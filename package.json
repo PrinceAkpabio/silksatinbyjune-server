@@ -1,0 +1,23 @@
+{
+  "name": "silksatinbyjune-server",
+  "version": "1.0.0",
+  "description": "E-commerce web application for nightware apparell brand",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "e-commerce",
+    "ecom",
+    "bonnet"
+  ],
+  "author": "Prince Akpabio",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7",
+    "swagger-jsdoc": "^6.0.0",
+    "swagger-ui-express": "^4.1.6"
+  }
+}

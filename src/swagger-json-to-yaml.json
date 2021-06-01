@@ -1,0 +1,122 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "silksatinbyjune-server",
+    "description": "E-commerce web application for nightware apparell brand and documented with Swagger",
+    "license": {
+      "name": "ISC",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "contact": {
+      "name": "Prince Akpabio",
+      "url": "https://apabioprince.netlify.app",
+      "email": "princeakpabio90@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000/"
+    }
+  ],
+  "paths": {
+    "/product/list": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get all products in system",
+        "parameters": [
+          {
+            "name": "category-id",
+            "in": "query",
+            "description": "This is the category-id of the category we are fetching from a database. This is for multi-category use case.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "category-name",
+            "in": "query",
+            "description": "This is the category name of the category we are fetching from a database. This is for multi-category use case.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "select-all",
+            "in": "query",
+            "description": "This is returns all categories assigned to the database.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully fetched all products from database"
+          }
+        }
+      }
+    },
+    "/product/id": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get single product from category",
+        "parameters": [
+          {
+            "name": "product-id",
+            "in": "query",
+            "description": "This is the product-id of the product we are fetching from a category. This is for multi-products use case.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved single product"
+          }
+        }
+      }
+    },
+    "/product/add": {
+      "post": {
+        "tags": ["Products"],
+        "summary": "Add new product to a category",
+        "responses": {
+          "200": {
+            "description": "Successfully fetched added new product to the category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name", "id"],
+                  "properties": {
+                    "category-id": {
+                      "type": "integer",
+                      "uniqueItems": true
+                    },
+                    "category-name": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "price": {
+                      "type": "integer"
+                    },
+                    "color": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
