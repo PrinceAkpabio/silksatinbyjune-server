@@ -1,8 +1,8 @@
 const express = require("express");
-const routeManager = require("../process/routeManager");
+const routeManager = require("../api/v1/products/routeManager");
 const swaggerUi = require("swagger-ui-express");
-const swaggerJson = require("./swagger.json");
-const { options } = require("../process/swagger-ui");
+const swaggerJsdoc = require("swagger-jsdoc");
+const { options } = require("../api/v1/docs/swagger-ui-options");
 
 /**
  * Initialise application with express
@@ -24,16 +24,18 @@ app.use(express.json());
 app.use("/product", routeManager);
 
 /**
- *  Setup swagger Ui
+ *  Setup swagger Ui with optional properties if needed and swagger-jsdocs for easier conversion for jsdoc comments from api files to a json
  */
 const swaggerOptions = {
   explorer: true,
 };
 
+const openApiSpecs = swaggerJsdoc(options);
+
 app.use(
   "/api-docs",
   swaggerUi.serve,
-  swaggerUi.setup(swaggerJson, swaggerOptions)
+  swaggerUi.setup(openApiSpecs, swaggerOptions)
 );
 
 /**

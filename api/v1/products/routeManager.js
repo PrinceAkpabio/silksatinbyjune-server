@@ -2,11 +2,15 @@ const express = require("express");
 const router = express.Router();
 
 const { handleGetProductList, handleGetSingleProduct } = require("./products");
-
 /**
- *  Retrive all products
+ * @openapi
+ * /:
+ *   get:
+ *     description: Welcome to swagger-jsdoc!
+ *     responses:
+ *       200:
+ *         description: Returns a mysterious string.
  */
-
 router.get("/list", (req, res, next) => {
   console.log("Get all products");
   handleGetProductList(req, res, next);
