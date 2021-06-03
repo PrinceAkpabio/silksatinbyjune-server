@@ -14,8 +14,6 @@ const handleWriteAndUpdateApiDocsFile = (path, data) => {
     fs.writeFile(path, convertJsonFileToYaml, (err) => {
       console.log("API write error: ", err);
     });
-
-    console.log("File generated successfully");
   } catch (err) {
     console.log("API catch error: ", err);
   }
@@ -26,6 +24,6 @@ const handleWriteAndUpdateApiDocsFile = (path, data) => {
  * Script to run file: npm run generate-docs
  */
 handleWriteAndUpdateApiDocsFile(
-  "./api/docs/api-docs.yaml",
+  "./api/v1/docs/api-docs.yaml",
   openapiSpecification
 );

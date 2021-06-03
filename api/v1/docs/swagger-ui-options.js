@@ -27,7 +27,7 @@ const options = {
       },
     ],
   },
-  apis: ["./api/v1/products/routeManager.js"],
+  apis: ["./api/v1/products/productRouter.js"],
 };
 
 /**
