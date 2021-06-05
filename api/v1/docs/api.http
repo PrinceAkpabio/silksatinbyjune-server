@@ -9,12 +9,28 @@ Content-Type: application/json
 
 {
   "name": "Bottegas scarves",
-  "category-id": 1,
+  "category_id": 1,
   "image": "https://www.mensjournal.com/wp-content/uploads/scarves-main-4491bdbf-a40c-424e-bfe8-dd6857beb063.jpg?w=900&quality=86&strip=all&ezimgfmt=ng:webp/ngcb5",
   "price": 1200,
   "size": 14,
   "color": "lilac",
-  "size-unit": "inches",
+  "size_unit": "inches",
   "description": "For those who look like individuals, and when winter’s chilly winds and icy snows roll in, there’s no more stylish mark of distinction than a really good bottega scarf",
-  "status": 1,
+  "status": 1
 }
+
+
+{
+  "name": "Nike runners",
+  "category_id": 1,
+  "image": "https://www.mensjournal.com/wp-content/uploads/scarves-main-4491bdbf-a40c-424e-bfe8-dd6857beb063.jpg?w=900&quality=86&strip=all&ezimgfmt=ng:webp/ngcb5",
+  "price": 1850,
+  "size": 44,
+  "color": "Gold-white",
+  "size_unit": "ft",
+  "description": "For those who look like individuals, and when winter’s chilly winds and icy snows roll in, there’s no more stylish mark of distinction than a really good Nike runners",
+  "status": 1
+}
+
+
+UPDATE `products` SET `name`="Alien-ware",`category_id`=2,`image`="https://www.mensjournal.com/wp-content/uploads/scarves-main-4491bdbf-a40c-424e-bfe8-dd6857beb063.jpg?w=900&quality=86&strip=all&ezimgfmt=ng:webp/ngcb5",`price`=1850,`size`=44,`color`=white,`size_unit`="ft",`description`="For those who look like individuals, and when winter’s chilly winds and icy snows roll in, there’s no more stylish mark of distinction than a really good Nike runners" WHERE `id` = 3

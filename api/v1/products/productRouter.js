@@ -4,8 +4,11 @@ const {
   handleGetProductList,
   handleGetSingleProduct,
   handleAddProduct,
+  handleDeleteProduct,
   handleAddProductCategory,
+  handleDeleteCategory,
   handleGetProductCategories,
+  handleUpdateProduct,
 } = require("./products");
 
 /**
@@ -94,7 +97,7 @@ router.get("/list", (req, res, next) => {
 
 /**
  * @openapi
- * /product/id:
+ * /product/item/id:
  *        get:
  *          tags:
  *          - Products
@@ -110,8 +113,72 @@ router.get("/list", (req, res, next) => {
  *                type: integer
  */
 
-router.get("/:id", (req, res, next) => {
+router.get("/item/:id", (req, res, next) => {
   handleGetSingleProduct(req, res, next);
+});
+
+/**
+ * @openapi
+ * /product/delete/id:
+ *        post:
+ *            tags:
+ *            - Products
+ *            summary: Delete a product from the product list.
+ *            description: Delete a product from the product list.
+ *            responses:
+ *                    200:
+ *                      description: Successfully delete product.
+ *            requestBody:
+ *                 content:
+ *                   application/json:
+ *                        schema:
+ *                             type: object
+ *                             properties:
+ *                                    id:
+ *                                     type: integer
+ */
+router.post("/delete/:id", urlParser, (req, res, next) => {
+  handleDeleteProduct(req, res, next);
+});
+
+/**
+ * @openapi
+ * /product/update:
+ *                post:
+ *                  tags:
+ *                  - Products
+ *                  summary: Update product in the product list.
+ *                  description: Update product in the product list.
+ *                  responses:
+ *                        200:
+ *                          description: Successfully updated product.
+ *                  requestBody:
+ *                      content:
+ *                          application/json:
+ *                                schema:
+ *                                    type: object
+ *                                    properties:
+ *                                            id:
+ *                                               type: integer
+ *                                            name:
+ *                                               type: string
+ *                                            category_id:
+ *                                               type: integer
+ *                                            image:
+ *                                               type: string
+ *                                            price:
+ *                                               type: integer
+ *                                            size:
+ *                                               type: integer
+ *                                            color:
+ *                                               type: string
+ *                                            size_unit:
+ *                                               type: string
+ *                                            description:
+ *                                               type: string
+ */
+router.post("/update", urlParser, (req, res, next) => {
+  handleUpdateProduct(req, res, next);
 });
 
 /**
@@ -142,6 +209,30 @@ router.get("/:id", (req, res, next) => {
  */
 router.post("/add-category", urlParser, (req, res, next) => {
   handleAddProductCategory(req, res, next);
+});
+
+/**
+ * @openapi
+ * /product/delete-category:
+ *              post:
+ *                tags:
+ *                - Products
+ *                summary: Delete a single category from category list.
+ *                description: Delete a single category from category list.
+ *                responses:
+ *                       200:
+ *                         description: Successfully deleted category.
+ *                requestBody:
+ *                    content:
+ *                        application/json:
+ *                                schema:
+ *                                    type: object
+ *                                    properties:
+ *                                        id:
+ *                                          type: integer
+ */
+router.post("/delete-category", (req, res, next) => {
+  handleDeleteCategory(req, res, next);
 });
 
 /**

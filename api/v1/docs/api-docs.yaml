@@ -78,7 +78,7 @@ paths:
       responses:
         200:
           description: "Successfully fetched all products from database"
-  /product/id:
+  /product/item/id:
     get:
       tags:
         - "Products"
@@ -92,6 +92,56 @@ paths:
           description: "This is the product-id of the product we are fetching from a category. This is for multi-products use case."
           schema:
             type: "integer"
+  /product/delete/id:
+    post:
+      tags:
+        - "Products"
+      summary: "Delete a product from the product list."
+      description: "Delete a product from the product list."
+      responses:
+        200:
+          description: "Successfully delete product."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                id:
+                  type: "integer"
+  /product/update:
+    post:
+      tags:
+        - "Products"
+      summary: "Update product in the product list."
+      description: "Update product in the product list."
+      responses:
+        200:
+          description: "Successfully updated product."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                id:
+                  type: "integer"
+                name:
+                  type: "string"
+                category_id:
+                  type: "integer"
+                image:
+                  type: "string"
+                price:
+                  type: "integer"
+                size:
+                  type: "integer"
+                color:
+                  type: "string"
+                size_unit:
+                  type: "string"
+                description:
+                  type: "string"
   /product/add-category:
     post:
       tags:
@@ -111,6 +161,23 @@ paths:
               properties:
                 name:
                   type: "string"
+  /product/delete-category:
+    post:
+      tags:
+        - "Products"
+      summary: "Delete a single category from category list."
+      description: "Delete a single category from category list."
+      responses:
+        200:
+          description: "Successfully deleted category."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                id:
+                  type: "integer"
   /product/category-list:
     get:
       tags:
