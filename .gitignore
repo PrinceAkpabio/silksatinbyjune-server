@@ -2,8 +2,6 @@
 /node_modules
 /.env.production
 /.env.staging
-/.env.dev
 /App_settings.txt
 /Procfile
-
-
+/.env.dev
