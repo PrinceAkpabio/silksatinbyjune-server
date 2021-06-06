@@ -57,6 +57,7 @@ const {
  */
 
 const urlParser = express.urlencoded();
+
 router.post("/add", urlParser, (req, res, next) => {
   handleAddProduct(req, res, next);
 });
