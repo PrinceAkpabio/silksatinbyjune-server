@@ -23,6 +23,9 @@ const options = {
     },
     servers: [
       {
+        url: "https://silksatinbyjune-server-api-dev.herokuapp.com/",
+      },
+      {
         url: "http://localhost:4000/",
       },
     ],

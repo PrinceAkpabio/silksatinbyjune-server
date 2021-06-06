@@ -36,8 +36,3 @@ Content-Type: application/json
 UPDATE `products` SET `name`="Alien-ware",`category_id`=2,`image`="https://www.mensjournal.com/wp-content/uploads/scarves-main-4491bdbf-a40c-424e-bfe8-dd6857beb063.jpg?w=900&quality=86&strip=all&ezimgfmt=ng:webp/ngcb5",`price`=1850,`size`=44,`color`=white,`size_unit`="ft",`description`="For those who look like individuals, and when winter’s chilly winds and icy snows roll in, there’s no more stylish mark of distinction than a really good Nike runners" WHERE `id` = 3
 
 
-CLEAR DB: 
-
- mysql://b1f1887e77e5ea:dcd846f8@us-cdbr-east-04.cleardb.com/heroku_d182a270b465ca5?reconnect=true
-
- mysql://b1f1887e77e5ea:dcd846f8@us-cdbr-east-04.cleardb.com/heroku_d182a270b465ca5?reconnect=true
