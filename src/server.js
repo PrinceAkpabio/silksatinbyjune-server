@@ -10,7 +10,7 @@ const { options } = require("../api/v1/docs/swagger-ui-options");
  */
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 4000;
 // const PORT = process.env.PORT;
 
 /**
