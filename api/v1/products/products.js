@@ -7,6 +7,12 @@ const connection = mysql.createConnection({
   database: process.env.DB,
 });
 
+// open the MySQL connection
+connection.connect((error) => {
+  if (error) throw error;
+  console.log("Successfully connected to the database.");
+});
+
 /**
  * Add product to products table using insert method for mysql and the following fields name, category_id, image, price, size, color, size_unit, description and status
  * @param {req} req
@@ -25,9 +31,9 @@ const handleAddProduct = (req, res) => {
           message: `Error occured: ${error}`,
         });
 
-        connection.end((err) => {
-          console.log("End connection error: ", err);
-        });
+        // connection.end((err) => {
+        //   console.log("End connection error: ", err);
+        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
@@ -72,9 +78,9 @@ const handleGetProductList = (req, res) => {
             data: results,
           });
 
-          connection.end((err) => {
-            console.log("End connection error: ", err);
-          });
+          // connection.end((err) => {
+          //   console.log("End connection error: ", err);
+          // });
         }
       }
     );
@@ -107,9 +113,9 @@ const handleGetProductList = (req, res) => {
             data: results,
           });
 
-          connection.end((err) => {
-            console.log("End connection error: ", err);
-          });
+          // connection.end((err) => {
+          //   console.log("End connection error: ", err);
+          // });
         }
       }
     );
@@ -137,9 +143,9 @@ const handleGetProductList = (req, res) => {
           message: "All products retrieved",
           data: results,
         });
-        connection.end((err) => {
-          console.log("End connection error: ", err);
-        });
+        // connection.end((err) => {
+        //   console.log("End connection error: ", err);
+        // });
       }
     });
   }
@@ -163,9 +169,9 @@ const handleGetSingleProduct = (req, res) => {
             message: `Error occured: ${error}`,
           });
 
-          connection.end((err) => {
-            console.log("End connection error: ", err);
-          });
+          // connection.end((err) => {
+          //   console.log("End connection error: ", err);
+          // });
         }
 
         // Return Results to client
@@ -206,9 +212,9 @@ const handleDeleteProduct = (req, res) => {
           message: "Product deleted from category",
         });
 
-        connection.end((error) => {
-          console.log("Error occured: ", error);
-        });
+        // connection.end((error) => {
+        //   console.log("Error occured: ", error);
+        // });
       }
     }
   );
@@ -242,9 +248,9 @@ const handleUpdateProduct = (req, res) => {
           data: results,
         });
 
-        connection.end((error) => {
-          console.log("Error occured: ", error);
-        });
+        // connection.end((error) => {
+        //   console.log("Error occured: ", error);
+        // });
       }
     }
   );
@@ -271,9 +277,9 @@ const handleAddProductCategory = (req, res) => {
           message: `Error occured: ${error}`,
         });
 
-        connection.end((err) => {
-          console.log("End connection error: ", err);
-        });
+        // connection.end((err) => {
+        //   console.log("End connection error: ", err);
+        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
@@ -311,9 +317,9 @@ const handleDeleteCategory = (req, res) => {
           message: "Category deleted successfully",
         });
 
-        connection.end((error) => {
-          console.log("Error occured: ", error);
-        });
+        // connection.end((error) => {
+        //   console.log("Error occured: ", error);
+        // });
       }
     }
   );
@@ -341,9 +347,9 @@ const handleGetProductCategories = (req, res) => {
             error: true,
             message: `Error occured: ${error}`,
           });
-          connection.end((err) => {
-            console.log("End connection error: ", err);
-          });
+          // connection.end((err) => {
+          //   console.log("End connection error: ", err);
+          // });
         }
 
         // Return Results to client
@@ -370,9 +376,9 @@ const handleGetProductCategories = (req, res) => {
           error: true,
           message: `Error occured: ${error}`,
         });
-        connection.end((err) => {
-          console.log("End connection error: ", err);
-        });
+        // connection.end((err) => {
+        //   console.log("End connection error: ", err);
+        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {

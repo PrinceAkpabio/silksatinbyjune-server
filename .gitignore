@@ -4,4 +4,3 @@
 /.env.staging
 /App_settings.txt
 /Procfile
-/.env.dev
