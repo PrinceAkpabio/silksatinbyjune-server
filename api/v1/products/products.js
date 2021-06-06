@@ -7,14 +7,18 @@ const connection = mysql.createConnection({
   database: process.env.DB,
 });
 
+/**
+ * Add product to products table using insert method for mysql and the following fields name, category_id, image, price, size, color, size_unit, description and status
+ * @param {req} req
+ * @param {res} res
+ */
 const handleAddProduct = (req, res) => {
-  //  `INSERT INTO products(name,category_id,image,price,size,color,size_unit,description,status) VALUES(${req.body.name})`;
-
   connection.query(
     "INSERT INTO `products`(`name`,`category_id`,`image`,`price`,`size`,`color`,`size_unit`,`description`,`status`) VALUES(" +
       `'${req.body.name}', ${req.body["category_id"]}, '${req.body.image}', ${req.body.price}, ${req.body.size}, '${req.body.color}', '${req.body["size_unit"]}', '${req.body.description}', ${req.body.status}` +
       ")",
     (error, results) => {
+      // Handle Errors
       if (error) {
         res.status(200).json({
           error: true,
@@ -25,7 +29,7 @@ const handleAddProduct = (req, res) => {
           console.log("End connection error: ", err);
         });
       }
-
+      // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
         res.status(200).json({
           error: false,
@@ -36,6 +40,11 @@ const handleAddProduct = (req, res) => {
   );
 };
 
+/**
+ * Fetch product list from products table with optional parameters such as fetch by: product id (id), category_id, and select_all (all products). All params are integers but can also be passed as strings
+ * @param {req} req
+ * @param {res} res
+ */
 const handleGetProductList = (req, res) => {
   // Get product with id
 
@@ -48,13 +57,14 @@ const handleGetProductList = (req, res) => {
       "SELECT * FROM `products` WHERE `id` = ?",
       req.query.id,
       (error, results) => {
+        // Handle Errors
         if (error) {
           res.status(200).json({
             error: true,
             message: `Error occured: ${error}`,
           });
         }
-
+        // Return Results to client
         if ((results !== undefined || results !== null) && !error) {
           res.status(200).json({
             error: false,
@@ -69,6 +79,7 @@ const handleGetProductList = (req, res) => {
       }
     );
   }
+
   // Fetch products by category id
   if (
     (req.query.category_id !== undefined || req.query.category_id !== null) &&
@@ -79,6 +90,7 @@ const handleGetProductList = (req, res) => {
       "SELECT * FROM `products` WHERE `category_id` = ?",
       [req.query.category_id],
       (error, results) => {
+        // Handle Errors
         if (error) {
           res.status(200).json({
             error: true,
@@ -86,6 +98,8 @@ const handleGetProductList = (req, res) => {
           });
           console.log("Check: ", error);
         }
+
+        // Return Results to client
         if ((results !== undefined || results !== null) && !error) {
           res.status(200).json({
             error: false,
@@ -108,12 +122,15 @@ const handleGetProductList = (req, res) => {
     (req.query.category_id === null || req.query.category_id === undefined)
   ) {
     connection.query("SELECT * FROM `products`", [], (error, results) => {
+      // Handle Errors
       if (error) {
         res.status(200).json({
           error: true,
           message: `Error occured: ${error}`,
         });
       }
+
+      // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
         res.status(200).json({
           error: false,
@@ -139,6 +156,7 @@ const handleGetSingleProduct = (req, res) => {
       "SELECT * FROM `products` WHERE `id` = ?",
       req.query.id,
       (error, results) => {
+        // Handle Errors
         if (error) {
           res.status(200).json({
             error: true,
@@ -149,6 +167,8 @@ const handleGetSingleProduct = (req, res) => {
             console.log("End connection error: ", err);
           });
         }
+
+        // Return Results to client
         if ((results !== undefined || results !== null) && !error) {
           res.status(200).json({
             error: false,
@@ -171,6 +191,7 @@ const handleDeleteProduct = (req, res) => {
     "DELETE FROM `products` WHERE `id` = ?",
     req.body.id,
     (error, results) => {
+      // Handle Errors
       if (error) {
         res.status(200).json({
           error: true,
@@ -178,6 +199,7 @@ const handleDeleteProduct = (req, res) => {
         });
       }
 
+      // Return Results to client
       if (results !== undefined && !error) {
         res.status(200).json({
           error: false,
@@ -204,6 +226,7 @@ const handleUpdateProduct = (req, res) => {
       "WHERE `id` =" +
       `${req.body.id}`,
     (error, results) => {
+      // Handle Errors
       if (error) {
         res.status(200).json({
           error: true,
@@ -211,6 +234,7 @@ const handleUpdateProduct = (req, res) => {
         });
       }
 
+      // Return Results to client
       if (results !== undefined && !error) {
         res.status(200).json({
           error: false,
@@ -226,14 +250,21 @@ const handleUpdateProduct = (req, res) => {
   );
 };
 
-/**
+/**-------------------------------------------------
  * Product Category handlers
+ * -------------------------------------------------
  */
 
+/**
+ *  Add new product category to category tables
+ * @param {req} req
+ * @param {res} res
+ */
 const handleAddProductCategory = (req, res) => {
   connection.query(
     "INSERT INTO `categories`(`name`) VALUES(" + `'${req.body.name}'` + ")",
     (error, results) => {
+      // Handle errors
       if (error) {
         res.status(200).json({
           error: true,
@@ -244,7 +275,7 @@ const handleAddProductCategory = (req, res) => {
           console.log("End connection error: ", err);
         });
       }
-
+      // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
         res.status(200).json({
           error: false,
@@ -265,6 +296,7 @@ const handleDeleteCategory = (req, res) => {
     "DELETE FROM `categories` WHERE `id` = ?",
     req.body.id,
     (error, results) => {
+      // Handle errors
       if (error) {
         res.status(200).json({
           error: true,
@@ -272,6 +304,7 @@ const handleDeleteCategory = (req, res) => {
         });
       }
 
+      // Return Results to client
       if (results !== undefined && !error) {
         res.status(200).json({
           error: false,
@@ -286,6 +319,11 @@ const handleDeleteCategory = (req, res) => {
   );
 };
 
+/**
+ * Fetch categories from table with either id (single category) or select-all (all categories)
+ * @param {req} req
+ * @param {res} res
+ */
 const handleGetProductCategories = (req, res) => {
   // Get category with id
 
@@ -297,6 +335,7 @@ const handleGetProductCategories = (req, res) => {
       "SELECT * FROM `categories` WHERE `id` = ?",
       req.query.id,
       (error, results) => {
+        //Handle Errors
         if (error) {
           res.status(200).json({
             error: true,
@@ -307,6 +346,7 @@ const handleGetProductCategories = (req, res) => {
           });
         }
 
+        // Return Results to client
         if ((results !== undefined || results !== null) && !error) {
           res.status(200).json({
             error: false,
@@ -324,6 +364,7 @@ const handleGetProductCategories = (req, res) => {
     (req.query.id === null || req.query.id === undefined)
   ) {
     connection.query("SELECT * FROM `categories` ", [], (error, results) => {
+      // Handle Errors
       if (error) {
         res.status(200).json({
           error: true,
@@ -333,6 +374,7 @@ const handleGetProductCategories = (req, res) => {
           console.log("End connection error: ", err);
         });
       }
+      // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
         res.status(200).json({
           error: false,
