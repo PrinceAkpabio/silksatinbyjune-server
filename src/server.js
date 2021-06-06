@@ -1,4 +1,5 @@
 const express = require("express");
+require("custom-env").env();
 const mysql = require("mysql");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
@@ -10,8 +11,7 @@ const { options } = require("../api/v1/docs/swagger-ui-options");
  */
 
 const app = express();
-const PORT = process.env.PORT || 4000;
-
+const PORT = process.env.PORT;
 /**
  * Set up middleware
  */

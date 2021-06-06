@@ -1,10 +1,10 @@
 const mysql = require("mysql");
 // const connection = require("../../../src/server");
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "silksatinbyjune-db",
+  host: process.env.HOST,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DB,
 });
 
 const handleAddProduct = (req, res) => {
