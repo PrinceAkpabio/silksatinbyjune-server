@@ -56,9 +56,9 @@ const {
  *                                   type: string
  */
 
-const urlParser = express.urlencoded();
+// const urlParser = express.urlencoded();
 
-router.post("/add", urlParser, (req, res, next) => {
+router.post("/add", (req, res, next) => {
   handleAddProduct(req, res, next);
 });
 
@@ -138,7 +138,7 @@ router.get("/item/:id", (req, res, next) => {
  *                                    id:
  *                                     type: integer
  */
-router.post("/delete/:id", urlParser, (req, res, next) => {
+router.post("/delete/:id", (req, res, next) => {
   handleDeleteProduct(req, res, next);
 });
 
@@ -178,7 +178,7 @@ router.post("/delete/:id", urlParser, (req, res, next) => {
  *                                            description:
  *                                               type: string
  */
-router.post("/update", urlParser, (req, res, next) => {
+router.post("/update", (req, res, next) => {
   handleUpdateProduct(req, res, next);
 });
 
@@ -208,7 +208,7 @@ router.post("/update", urlParser, (req, res, next) => {
  *                                name:
  *                                   type: string
  */
-router.post("/add-category", urlParser, (req, res, next) => {
+router.post("/add-category", (req, res, next) => {
   handleAddProductCategory(req, res, next);
 });
 
