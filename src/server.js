@@ -1,5 +1,5 @@
 const express = require("express");
-require("custom-env").env();
+require("custom-env").env("dev");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const productRouter = require("../api/v1/products/productRouter");
