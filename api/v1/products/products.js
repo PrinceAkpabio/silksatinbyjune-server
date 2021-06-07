@@ -17,10 +17,6 @@ const handleAddProduct = (req, res) => {
           error: true,
           message: `Error occured: ${error}`,
         });
-
-        // connection.end((err) => {
-        //   console.log("End connection error: ", err);
-        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
@@ -64,10 +60,6 @@ const handleGetProductList = (req, res) => {
             message: "Product retrieved",
             data: results,
           });
-
-          // connection.end((err) => {
-          //   console.log("End connection error: ", err);
-          // });
         }
       }
     );
@@ -99,10 +91,6 @@ const handleGetProductList = (req, res) => {
             message: "All products retrieved by category",
             data: results,
           });
-
-          // connection.end((err) => {
-          //   console.log("End connection error: ", err);
-          // });
         }
       }
     );
@@ -130,9 +118,6 @@ const handleGetProductList = (req, res) => {
           message: "All products retrieved",
           data: results,
         });
-        // connection.end((err) => {
-        //   console.log("End connection error: ", err);
-        // });
       }
     });
   }
@@ -155,10 +140,6 @@ const handleGetSingleProduct = (req, res) => {
             error: true,
             message: `Error occured: ${error}`,
           });
-
-          // connection.end((err) => {
-          //   console.log("End connection error: ", err);
-          // });
         }
 
         // Return Results to client
@@ -198,10 +179,6 @@ const handleDeleteProduct = (req, res) => {
           error: false,
           message: "Product deleted from category",
         });
-
-        // connection.end((error) => {
-        //   console.log("Error occured: ", error);
-        // });
       }
     }
   );
@@ -234,10 +211,6 @@ const handleUpdateProduct = (req, res) => {
           message: "Product updated successfully",
           data: results,
         });
-
-        // connection.end((error) => {
-        //   console.log("Error occured: ", error);
-        // });
       }
     }
   );
@@ -263,10 +236,6 @@ const handleAddProductCategory = (req, res) => {
           error: true,
           message: `Error occured: ${error}`,
         });
-
-        // connection.end((err) => {
-        //   console.log("End connection error: ", err);
-        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
@@ -303,10 +272,6 @@ const handleDeleteCategory = (req, res) => {
           error: false,
           message: "Category deleted successfully",
         });
-
-        // connection.end((error) => {
-        //   console.log("Error occured: ", error);
-        // });
       }
     }
   );
@@ -334,9 +299,6 @@ const handleGetProductCategories = (req, res) => {
             error: true,
             message: `Error occured: ${error}`,
           });
-          // connection.end((err) => {
-          //   console.log("End connection error: ", err);
-          // });
         }
 
         // Return Results to client
@@ -363,9 +325,6 @@ const handleGetProductCategories = (req, res) => {
           error: true,
           message: `Error occured: ${error}`,
         });
-        // connection.end((err) => {
-        //   console.log("End connection error: ", err);
-        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
