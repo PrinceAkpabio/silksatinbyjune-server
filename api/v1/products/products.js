@@ -1,4 +1,5 @@
 const connection = require("../../../config/db.config");
+const { statusManager } = require("../../../util/statusManager");
 
 /**
  * Add product to products table using insert method for mysql and the following fields name, category_id, image, price, size, color, size_unit, description and status
@@ -13,17 +14,20 @@ const handleAddProduct = (req, res) => {
     (error, results) => {
       // Handle Errors
       if (error) {
-        res.status(200).json({
-          error: true,
-          message: `Error occured: ${error}`,
-        });
+        statusManager(res, 400, `Error occured: ${error}`);
+        // res.status(200).json({
+        //   error: true,
+        //   message: `Error occured: ${error}`,
+        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
-        res.status(200).json({
-          error: false,
-          message: "New product added",
-        });
+        statusManager(res, 200, "New product added");
+
+        // res.status(200).json({
+        //   error: false,
+        //   message: "New product added",
+        // });
       }
     }
   );
@@ -48,18 +52,20 @@ const handleGetProductList = (req, res) => {
       (error, results) => {
         // Handle Errors
         if (error) {
-          res.status(200).json({
-            error: true,
-            message: `Error occured: ${error}`,
-          });
+          statusManager(res, 400, `Error occured: ${error}`);
+          // res.status(200).json({
+          //   error: true,
+          //   message: `Error occured: ${error}`,
+          // });
         }
         // Return Results to client
         if ((results !== undefined || results !== null) && !error) {
-          res.status(200).json({
-            error: false,
-            message: "Product retrieved",
-            data: results,
-          });
+          statusManager(res, 200, "Product retrieved", results);
+          // res.status(200).json({
+          //   error: false,
+          //   message: "Product retrieved",
+          //   data: results,
+          // });
         }
       }
     );
@@ -77,20 +83,27 @@ const handleGetProductList = (req, res) => {
       (error, results) => {
         // Handle Errors
         if (error) {
-          res.status(200).json({
-            error: true,
-            message: `Error occured: ${error}`,
-          });
-          console.log("Check: ", error);
+          statusManager(res, 400, `Error occured: ${error}`);
+          // res.status(200).json({
+          //   error: true,
+          //   message: `Error occured: ${error}`,
+          // });
+          // console.log("Check: ", error);
         }
 
         // Return Results to client
         if ((results !== undefined || results !== null) && !error) {
-          res.status(200).json({
-            error: false,
-            message: "All products retrieved by category",
-            data: results,
-          });
+          statusManager(
+            res,
+            200,
+            "All products retrieved by category",
+            results
+          );
+          // res.status(200).json({
+          //   error: false,
+          //   message: "All products retrieved by category",
+          //   data: results,
+          // });
         }
       }
     );
@@ -105,19 +118,21 @@ const handleGetProductList = (req, res) => {
     connection.query("SELECT * FROM `products`", [], (error, results) => {
       // Handle Errors
       if (error) {
-        res.status(200).json({
-          error: true,
-          message: `Error occured: ${error}`,
-        });
+        statusManager(res, 400, `Error occured: ${error}`);
+        // res.status(200).json({
+        //   error: true,
+        //   message: `Error occured: ${error}`,
+        // });
       }
 
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
-        res.status(200).json({
-          error: false,
-          message: "All products retrieved",
-          data: results,
-        });
+        statusManager(res, 200, "All products retrieved", results);
+        // res.status(200).json({
+        //   error: false,
+        //   message: "All products retrieved",
+        //   data: results,
+        // });
       }
     });
   }
@@ -136,19 +151,23 @@ const handleGetSingleProduct = (req, res) => {
       (error, results) => {
         // Handle Errors
         if (error) {
-          res.status(200).json({
-            error: true,
-            message: `Error occured: ${error}`,
-          });
+          statusManager(res, 400, `Error occured: ${error}`);
+
+          // res.status(200).json({
+          //   error: true,
+          //   message: `Error occured: ${error}`,
+          // });
         }
 
         // Return Results to client
         if ((results !== undefined || results !== null) && !error) {
-          res.status(200).json({
-            error: false,
-            message: "Single product retrieved",
-            data: results,
-          });
+          statusManager(res, 200, "Single product retrieved", results);
+
+          // res.status(200).json({
+          //   error: false,
+          //   message: "Single product retrieved",
+          //   data: results,
+          // });
         }
       }
     );
@@ -167,18 +186,22 @@ const handleDeleteProduct = (req, res) => {
     (error, results) => {
       // Handle Errors
       if (error) {
-        res.status(200).json({
-          error: true,
-          message: error,
-        });
+        statusManager(res, 400, `Error occured: ${error}`);
+
+        // res.status(200).json({
+        //   error: true,
+        //   message: error,
+        // });
       }
 
       // Return Results to client
       if (results !== undefined && !error) {
-        res.status(200).json({
-          error: false,
-          message: "Product deleted from category",
-        });
+        statusManager(res, 200, "Product deleted from category");
+
+        // res.status(200).json({
+        //   error: false,
+        //   message: "Product deleted from category",
+        // });
       }
     }
   );
@@ -198,19 +221,23 @@ const handleUpdateProduct = (req, res) => {
     (error, results) => {
       // Handle Errors
       if (error) {
-        res.status(200).json({
-          error: true,
-          message: error,
-        });
+        statusManager(res, 400, `Error occured: ${error}`);
+
+        // res.status(200).json({
+        //   error: true,
+        //   message: error,
+        // });
       }
 
       // Return Results to client
       if (results !== undefined && !error) {
-        res.status(200).json({
-          error: false,
-          message: "Product updated successfully",
-          data: results,
-        });
+        statusManager(res, 200, "Product updated successfully", results);
+
+        // res.status(200).json({
+        //   error: false,
+        //   message: "Product updated successfully",
+        //   data: results,
+        // });
       }
     }
   );
@@ -232,17 +259,21 @@ const handleAddProductCategory = (req, res) => {
     (error, results) => {
       // Handle errors
       if (error) {
-        res.status(200).json({
-          error: true,
-          message: `Error occured: ${error}`,
-        });
+        statusManager(res, 400, `Error occured: ${error}`);
+
+        // res.status(200).json({
+        //   error: true,
+        //   message: `Error occured: ${error}`,
+        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
-        res.status(200).json({
-          error: false,
-          message: "Category added",
-        });
+        statusManager(res, 200, "Category added");
+
+        // res.status(200).json({
+        //   error: false,
+        //   message: "Category added",
+        // });
       }
     }
   );
@@ -260,18 +291,22 @@ const handleDeleteCategory = (req, res) => {
     (error, results) => {
       // Handle errors
       if (error) {
-        res.status(200).json({
-          error: true,
-          message: error,
-        });
+        statusManager(res, 400, `Error occured: ${error}`);
+
+        // res.status(200).json({
+        //   error: true,
+        //   message: error,
+        // });
       }
 
       // Return Results to client
       if (results !== undefined && !error) {
-        res.status(200).json({
-          error: false,
-          message: "Category deleted successfully",
-        });
+        statusManager(res, 200, "Category deleted successfully");
+
+        // res.status(200).json({
+        //   error: false,
+        //   message: "Category deleted successfully",
+        // });
       }
     }
   );
@@ -295,19 +330,27 @@ const handleGetProductCategories = (req, res) => {
       (error, results) => {
         //Handle Errors
         if (error) {
-          res.status(200).json({
-            error: true,
-            message: `Error occured: ${error}`,
-          });
+          statusManager(res, 400, `Error occured: ${error}`);
+
+          // res.status(200).json({
+          //   error: true,
+          //   message: `Error occured: ${error}`,
+          // });
         }
 
         // Return Results to client
         if ((results !== undefined || results !== null) && !error) {
-          res.status(200).json({
-            error: false,
-            message: "Successfully fetched single category from database",
-            data: results,
-          });
+          statusManager(
+            res,
+            200,
+            "Successfully fetched single category from database",
+            results
+          );
+          // res.status(200).json({
+          //   error: false,
+          //   message: "Successfully fetched single category from database",
+          //   data: results,
+          // });
         }
       }
     );
@@ -321,18 +364,26 @@ const handleGetProductCategories = (req, res) => {
     connection.query("SELECT * FROM `categories` ", [], (error, results) => {
       // Handle Errors
       if (error) {
-        res.status(200).json({
-          error: true,
-          message: `Error occured: ${error}`,
-        });
+        statusManager(res, 400, `Error occured: ${error}`);
+        // res.status(200).json({
+        //   error: true,
+        //   message: `Error occured: ${error}`,
+        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
-        res.status(200).json({
-          error: false,
-          message: "Successfully fetched all categories from database",
-          data: results,
-        });
+        statusManager(
+          res,
+          200,
+          "Successfully fetched all categories from database",
+          results
+        );
+
+        // res.status(200).json({
+        //   error: false,
+        //   message: "Successfully fetched all categories from database",
+        //   data: results,
+        // });
       }
     });
   }
