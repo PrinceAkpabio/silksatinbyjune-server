@@ -82,15 +82,21 @@ router.post("/add", urlParser, (req, res, next) => {
  *                 a database. This is for multi-category use case.
  *               schema:
  *                 type: string
+ *             - name: count
+ *               in: query
+ *               description: This returns the number of products you set in the count field
+ *               schema:
+ *                 type: integer
  *             - name: select_all
  *               in: query
- *               description: This is returns all categories assigned to the database.
+ *               description: This is returns all products assigned to the database.
  *               schema:
  *                 type: integer
  *             responses:
  *                   200:
  *                     description: Successfully fetched all products from database
- *
+ *                   400:
+ *                     description: Could not fetch products from db, check your parameter values
  */
 router.get("/list", (req, res, next) => {
   handleGetProductList(req, res, next);
@@ -248,6 +254,11 @@ router.post("/delete-category", (req, res, next) => {
  *               in: query
  *               description: This is the category id of the category we are fetching from
  *                 a database. This is for multi-category use case.
+ *               schema:
+ *                 type: integer
+ *             - name: count
+ *               in: query
+ *               description: Fetch categories by a defined limit or count
  *               schema:
  *                 type: integer
  *             - name: select_all
