@@ -38,13 +38,47 @@ const handleAddProduct = (req, res) => {
  * @param {res} res
  */
 const handleGetProductList = (req, res) => {
+  // Fetch products by count (limit)
+
+  if (
+    (req.query.count !== undefined || req.query.count !== null) &&
+    (req.query.select_all === null || req.query.select_all === undefined) &&
+    (req.query.id === null || req.query.id === undefined) &&
+    (req.query.category_id === null || req.query.category_id === undefined)
+  ) {
+    connection.query(
+      "SELECT * FROM `products` LIMIT " + req.query.count,
+      (error, results) => {
+        // Handle Errors
+        if (error) {
+          statusManager(res, 400, error);
+        }
+
+        // Return limited results to client
+        if ((results !== undefined || results !== null) && !error) {
+          statusManager(
+            res,
+            200,
+            `${req.query.count} ${
+              req.query.count == 1 ? "product" : "products"
+            } retrived from db`,
+            results
+          );
+        }
+      }
+    );
+  }
+
   // Get product with id
 
   if (
     (req.query.id !== null || req.query.id !== undefined) &&
     (req.query.category_id === null || req.query.category_id === undefined) &&
-    (req.query.select_all === null || req.query.select_all === undefined)
+    (req.query.select_all === null || req.query.select_all === undefined) &&
+    (req.query.count === null || req.query.count === undefined)
   ) {
+    console.log("Fired in id");
+
     connection.query(
       "SELECT * FROM `products` WHERE `id` = ?",
       req.query.id,
@@ -65,8 +99,11 @@ const handleGetProductList = (req, res) => {
   if (
     (req.query.category_id !== undefined || req.query.category_id !== null) &&
     (req.query.id === null || req.query.id === undefined) &&
-    (req.query.select_all === null || req.query.select_all === undefined)
+    (req.query.select_all === null || req.query.select_all === undefined) &&
+    (req.query.count === null || req.query.count === undefined)
   ) {
+    console.log("Fired in category id");
+
     connection.query(
       "SELECT * FROM `products` WHERE `category_id` = ?",
       [req.query.category_id],
@@ -93,8 +130,11 @@ const handleGetProductList = (req, res) => {
   if (
     req.query.select_all == 1 &&
     (req.query.id === null || req.query.id === undefined) &&
-    (req.query.category_id === null || req.query.category_id === undefined)
+    (req.query.category_id === null || req.query.category_id === undefined) &&
+    (req.query.count === null || req.query.count === undefined)
   ) {
+    console.log("Fired in select all");
+
     connection.query("SELECT * FROM `products`", [], (error, results) => {
       // Handle Errors
       if (error) {
@@ -243,11 +283,42 @@ const handleDeleteCategory = (req, res) => {
  * @param {res} res
  */
 const handleGetProductCategories = (req, res) => {
+  // Fetch categories by count (limit)
+
+  if (
+    (req.query.count !== undefined || req.query.count !== null) &&
+    (req.query.select_all === null || req.query.select_all === undefined) &&
+    (req.query.id === null || req.query.id === undefined)
+  ) {
+    connection.query(
+      "SELECT * FROM `categories` LIMIT " + req.query.count,
+      (error, results) => {
+        // Handle Errors
+        if (error) {
+          statusManager(res, 400, error);
+        }
+
+        // Return limited results to client
+        if ((results !== undefined || results !== null) && !error) {
+          statusManager(
+            res,
+            200,
+            `${req.query.count} ${
+              req.query.count == 1 ? "category" : "categories"
+            } retrived from db`,
+            results
+          );
+        }
+      }
+    );
+  }
+
   // Get category with id
 
   if (
     (req.query.id !== null || req.query.id !== undefined) &&
-    (req.query.select_all === null || req.query.select_all === undefined)
+    (req.query.select_all === null || req.query.select_all === undefined) &&
+    (req.query.count === undefined || req.query.count === null)
   ) {
     connection.query(
       "SELECT * FROM `categories` WHERE `id` = ?",
@@ -274,7 +345,8 @@ const handleGetProductCategories = (req, res) => {
   // Fetch all categories in db
   if (
     req.query.select_all == 1 &&
-    (req.query.id === null || req.query.id === undefined)
+    (req.query.id === null || req.query.id === undefined) &&
+    (req.query.count === undefined || req.query.count === null)
   ) {
     connection.query("SELECT * FROM `categories` ", [], (error, results) => {
       // Handle Errors
