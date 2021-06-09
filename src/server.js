@@ -20,16 +20,6 @@ const PORT = process.env.PORT || 4000;
 app.use(express.json());
 
 /**
- * MySQL setup
- */
-// module.exports.connection = mysql.createConnection({
-//   host: "localhost",
-//   user: "root",
-//   password: "",
-//   database: "silksatinbyjune-db",
-// });
-
-/**
  * Fire Routers
  */
 

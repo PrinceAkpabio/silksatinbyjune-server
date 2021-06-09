@@ -1,5 +1,9 @@
 const connection = require("../../../config/db.config");
 const { statusManager } = require("../../../util/statusManager");
+const {
+  convertToDoubleDateTimeValue,
+  createTimeDateIn,
+} = require("../../../util/dateTimeManager");
 
 /**
  * Add product to products table using insert method for mysql and the following fields name, category_id, image, price, size, color, size_unit, description and status
@@ -7,27 +11,22 @@ const { statusManager } = require("../../../util/statusManager");
  * @param {res} res
  */
 const handleAddProduct = (req, res) => {
+  const { time_in, date_in, date_updated } = createTimeDateIn(
+    convertToDoubleDateTimeValue
+  );
+
   connection.query(
-    "INSERT INTO `products`(`name`,`category_id`,`image`,`price`,`size`,`color`,`size_unit`,`description`,`status`) VALUES(" +
-      `'${req.body.name}', ${req.body["category_id"]}, '${req.body.image}', ${req.body.price}, ${req.body.size}, '${req.body.color}', '${req.body["size_unit"]}', '${req.body.description}', ${req.body.status}` +
+    "INSERT INTO `products`(`name`,`category_id`,`image`,`price`,`size`,`color`,`size_unit`,`description`,`status`, `time_in`, `date_in`, `date_updated`) VALUES(" +
+      `'${req.body.name}', ${req.body["category_id"]}, '${req.body.image}', ${req.body.price}, ${req.body.size}, '${req.body.color}', '${req.body["size_unit"]}', '${req.body.description}', ${req.body.status}, '${time_in}', '${date_in}', '${date_updated}' ` +
       ")",
     (error, results) => {
       // Handle Errors
       if (error) {
         statusManager(res, 400, `Error occured: ${error}`);
-        // res.status(200).json({
-        //   error: true,
-        //   message: `Error occured: ${error}`,
-        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
         statusManager(res, 200, "New product added");
-
-        // res.status(200).json({
-        //   error: false,
-        //   message: "New product added",
-        // });
       }
     }
   );
@@ -53,19 +52,10 @@ const handleGetProductList = (req, res) => {
         // Handle Errors
         if (error) {
           statusManager(res, 400, `Error occured: ${error}`);
-          // res.status(200).json({
-          //   error: true,
-          //   message: `Error occured: ${error}`,
-          // });
         }
         // Return Results to client
         if ((results !== undefined || results !== null) && !error) {
           statusManager(res, 200, "Product retrieved", results);
-          // res.status(200).json({
-          //   error: false,
-          //   message: "Product retrieved",
-          //   data: results,
-          // });
         }
       }
     );
@@ -84,11 +74,6 @@ const handleGetProductList = (req, res) => {
         // Handle Errors
         if (error) {
           statusManager(res, 400, `Error occured: ${error}`);
-          // res.status(200).json({
-          //   error: true,
-          //   message: `Error occured: ${error}`,
-          // });
-          // console.log("Check: ", error);
         }
 
         // Return Results to client
@@ -99,11 +84,6 @@ const handleGetProductList = (req, res) => {
             "All products retrieved by category",
             results
           );
-          // res.status(200).json({
-          //   error: false,
-          //   message: "All products retrieved by category",
-          //   data: results,
-          // });
         }
       }
     );
@@ -119,20 +99,11 @@ const handleGetProductList = (req, res) => {
       // Handle Errors
       if (error) {
         statusManager(res, 400, `Error occured: ${error}`);
-        // res.status(200).json({
-        //   error: true,
-        //   message: `Error occured: ${error}`,
-        // });
       }
 
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
         statusManager(res, 200, "All products retrieved", results);
-        // res.status(200).json({
-        //   error: false,
-        //   message: "All products retrieved",
-        //   data: results,
-        // });
       }
     });
   }
@@ -152,22 +123,11 @@ const handleGetSingleProduct = (req, res) => {
         // Handle Errors
         if (error) {
           statusManager(res, 400, `Error occured: ${error}`);
-
-          // res.status(200).json({
-          //   error: true,
-          //   message: `Error occured: ${error}`,
-          // });
         }
 
         // Return Results to client
         if ((results !== undefined || results !== null) && !error) {
           statusManager(res, 200, "Single product retrieved", results);
-
-          // res.status(200).json({
-          //   error: false,
-          //   message: "Single product retrieved",
-          //   data: results,
-          // });
         }
       }
     );
@@ -187,21 +147,11 @@ const handleDeleteProduct = (req, res) => {
       // Handle Errors
       if (error) {
         statusManager(res, 400, `Error occured: ${error}`);
-
-        // res.status(200).json({
-        //   error: true,
-        //   message: error,
-        // });
       }
 
       // Return Results to client
       if (results !== undefined && !error) {
         statusManager(res, 200, "Product deleted from category");
-
-        // res.status(200).json({
-        //   error: false,
-        //   message: "Product deleted from category",
-        // });
       }
     }
   );
@@ -213,31 +163,21 @@ const handleDeleteProduct = (req, res) => {
  * @param {res} res
  */
 const handleUpdateProduct = (req, res) => {
+  const { date_updated } = createTimeDateIn(convertToDoubleDateTimeValue);
   connection.query(
     "UPDATE `products` SET " +
-      `name ='${req.body.name}', category_id =${req.body.category_id}, image ='${req.body.image}', price =${req.body.price}, size =${req.body.size}, color ='${req.body.color}', size_unit ='${req.body["size_unit"]}', description ='${req.body.description}' ` +
+      `name ='${req.body.name}', category_id =${req.body.category_id}, image ='${req.body.image}', price =${req.body.price}, size =${req.body.size}, color ='${req.body.color}', size_unit ='${req.body["size_unit"]}', description ='${req.body.description}', date_updated='${date_updated}' ` +
       "WHERE `id` =" +
       `${req.body.id}`,
     (error, results) => {
       // Handle Errors
       if (error) {
         statusManager(res, 400, `Error occured: ${error}`);
-
-        // res.status(200).json({
-        //   error: true,
-        //   message: error,
-        // });
       }
 
       // Return Results to client
       if (results !== undefined && !error) {
         statusManager(res, 200, "Product updated successfully", results);
-
-        // res.status(200).json({
-        //   error: false,
-        //   message: "Product updated successfully",
-        //   data: results,
-        // });
       }
     }
   );
@@ -254,26 +194,21 @@ const handleUpdateProduct = (req, res) => {
  * @param {res} res
  */
 const handleAddProductCategory = (req, res) => {
+  const { time_in, date_in, date_updated } = createTimeDateIn(
+    convertToDoubleDateTimeValue
+  );
   connection.query(
-    "INSERT INTO `categories`(`name`) VALUES(" + `'${req.body.name}'` + ")",
+    "INSERT INTO `categories`(`name`, `time_in`, `date_in`, `date_updated`) VALUES(" +
+      `'${req.body.name}', '${time_in}', '${date_in}', '${date_updated}'` +
+      ")",
     (error, results) => {
       // Handle errors
       if (error) {
         statusManager(res, 400, `Error occured: ${error}`);
-
-        // res.status(200).json({
-        //   error: true,
-        //   message: `Error occured: ${error}`,
-        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
         statusManager(res, 200, "Category added");
-
-        // res.status(200).json({
-        //   error: false,
-        //   message: "Category added",
-        // });
       }
     }
   );
@@ -292,21 +227,11 @@ const handleDeleteCategory = (req, res) => {
       // Handle errors
       if (error) {
         statusManager(res, 400, `Error occured: ${error}`);
-
-        // res.status(200).json({
-        //   error: true,
-        //   message: error,
-        // });
       }
 
       // Return Results to client
       if (results !== undefined && !error) {
         statusManager(res, 200, "Category deleted successfully");
-
-        // res.status(200).json({
-        //   error: false,
-        //   message: "Category deleted successfully",
-        // });
       }
     }
   );
@@ -331,11 +256,6 @@ const handleGetProductCategories = (req, res) => {
         //Handle Errors
         if (error) {
           statusManager(res, 400, `Error occured: ${error}`);
-
-          // res.status(200).json({
-          //   error: true,
-          //   message: `Error occured: ${error}`,
-          // });
         }
 
         // Return Results to client
@@ -346,11 +266,6 @@ const handleGetProductCategories = (req, res) => {
             "Successfully fetched single category from database",
             results
           );
-          // res.status(200).json({
-          //   error: false,
-          //   message: "Successfully fetched single category from database",
-          //   data: results,
-          // });
         }
       }
     );
@@ -365,10 +280,6 @@ const handleGetProductCategories = (req, res) => {
       // Handle Errors
       if (error) {
         statusManager(res, 400, `Error occured: ${error}`);
-        // res.status(200).json({
-        //   error: true,
-        //   message: `Error occured: ${error}`,
-        // });
       }
       // Return Results to client
       if ((results !== undefined || results !== null) && !error) {
@@ -378,12 +289,6 @@ const handleGetProductCategories = (req, res) => {
           "Successfully fetched all categories from database",
           results
         );
-
-        // res.status(200).json({
-        //   error: false,
-        //   message: "Successfully fetched all categories from database",
-        //   data: results,
-        // });
       }
     });
   }
