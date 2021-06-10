@@ -87,6 +87,11 @@ router.post("/add", urlParser, (req, res, next) => {
  *               description: This returns the number of products you set in the count field
  *               schema:
  *                 type: integer
+ *             - name: last_item_id
+ *               in: query
+ *               description: Returns an array of data with less than the last row id passed. If not passed, it defaults to zero
+ *               schema:
+ *                  type: integer
  *             - name: select_all
  *               in: query
  *               description: This is returns all products assigned to the database.
@@ -261,6 +266,11 @@ router.post("/delete-category", (req, res, next) => {
  *               description: Fetch categories by a defined limit or count
  *               schema:
  *                 type: integer
+ *             - name: last_item_id
+ *               in: query
+ *               description: Returns an array of data with less than the last row id passed. If not passed,it defaults to zero
+ *               schema:
+ *                  type: integer
  *             - name: select_all
  *               in: query
  *               description: This is returns all categories assigned to the database.

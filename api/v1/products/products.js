@@ -34,17 +34,28 @@ const handleAddProduct = (req, res) => {
 
 /**
  * Fetch product list from products table with optional parameters such as fetch by: product id (id), category_id, and select_all (all products). All params are integers but can also be passed as strings
- * @param {req} req
- * @param {res} res
+ * @param {object} req
+ * @param {object} res
+ * @param {function} next
+ * @param {integer} lastItemId
+ * @param {integer} count
  */
-const handleGetProductList = (req, res) => {
+const handleGetProductList = (
+  req,
+  res,
+  next,
+  lastItemId = 0,
+  count = 20,
+  ORDER_BY = "DESC"
+) => {
   // Fetch products by count (limit)
 
   if (
     (req.query.count !== undefined || req.query.count !== null) &&
     (req.query.select_all === null || req.query.select_all === undefined) &&
     (req.query.id === null || req.query.id === undefined) &&
-    (req.query.category_id === null || req.query.category_id === undefined)
+    (req.query.category_id === null || req.query.category_id === undefined) &&
+    (req.query.last_item_id === undefined || req.query.last_item_id === null)
   ) {
     connection.query(
       "SELECT * FROM `products` LIMIT " + req.query.count,
@@ -75,10 +86,9 @@ const handleGetProductList = (req, res) => {
     (req.query.id !== null || req.query.id !== undefined) &&
     (req.query.category_id === null || req.query.category_id === undefined) &&
     (req.query.select_all === null || req.query.select_all === undefined) &&
-    (req.query.count === null || req.query.count === undefined)
+    (req.query.count === null || req.query.count === undefined) &&
+    (req.query.last_item_id === undefined || req.query.last_item_id === null)
   ) {
-    console.log("Fired in id");
-
     connection.query(
       "SELECT * FROM `products` WHERE `id` = ?",
       req.query.id,
@@ -100,10 +110,9 @@ const handleGetProductList = (req, res) => {
     (req.query.category_id !== undefined || req.query.category_id !== null) &&
     (req.query.id === null || req.query.id === undefined) &&
     (req.query.select_all === null || req.query.select_all === undefined) &&
-    (req.query.count === null || req.query.count === undefined)
+    (req.query.count === null || req.query.count === undefined) &&
+    (req.query.last_item_id === undefined || req.query.last_item_id === null)
   ) {
-    console.log("Fired in category id");
-
     connection.query(
       "SELECT * FROM `products` WHERE `category_id` = ?",
       [req.query.category_id],
@@ -126,15 +135,83 @@ const handleGetProductList = (req, res) => {
     );
   }
 
+  // Get products from db using the last item/row id from product list in both ascending and descending order
+
+  if (
+    (req.query.last_item_id !== undefined || req.query.last_item_id !== null) &&
+    (req.query.count !== undefined || req.query.count !== null) &&
+    (req.query.id === null || req.query.id === undefined) &&
+    (req.query.category_id === null || req.query.category_id === undefined) &&
+    (req.query.select_all === null || req.query.select_all === undefined)
+  ) {
+    // Check if values were passed from the client for the last item id and count, if any use that instead of default value. This will help in continous pagination of data.
+    if (req.query.last_item_id !== null || req.query.last_item_id !== "") {
+      lastItemId = req.query.last_item_id;
+    }
+
+    if (req.query.count !== null || req.query.count !== "") {
+      count = req.query.count;
+    }
+
+    /**
+     * using the order_by param client can change the order the data is arranged in the array either by ascending or descending. Default order is descending
+     * @todo add order_by param to client to process changes dynamically
+     */
+    let sql;
+    if (ORDER_BY === "DESC" && lastItemId > 0) {
+      /**  for desc ordered list, the next page to get must be lesser that the last-item-id */
+      sql =
+        "SELECT * FROM `products` WHERE `id` < " +
+        `${lastItemId}` +
+        " ORDER BY `id` " +
+        `${ORDER_BY}` +
+        " LIMIT " +
+        `${count}`;
+    } else {
+      /**  assume we are using  asc ordered list, the next page to get must be greater that the last-item-id */
+      sql =
+        "SELECT * FROM `products` WHERE `id` > " +
+        " ORDER BY `id` " +
+        `${ORDER_BY}` +
+        " LIMIT " +
+        `${count}`;
+    }
+    connection.query(sql, (error, results) => {
+      // Handle Errors
+      if (error) {
+        statusManager(res, 400, `Error occured: ${error}`);
+      }
+
+      // Return Results to client
+      if ((results !== undefined || results !== null) && !error) {
+        //Return the last item id from the results array for continous pagination of data. If results array is empty then last item id is returned as null to inform the client of the current situation
+        const parsedResults = JSON.parse(JSON.stringify(results));
+        const parsedLastItemId =
+          parsedResults[0] === undefined
+            ? null
+            : parsedResults[parsedResults.length - 1].id;
+
+        statusManager(
+          res,
+          200,
+          parsedResults[0] === undefined
+            ? "No products retrived, end of pagination"
+            : "Product list retrieved with last item id",
+          results,
+          { last_item_id: parsedLastItemId }
+        );
+      }
+    });
+  }
+
   // Fetch all products in db
   if (
     req.query.select_all == 1 &&
     (req.query.id === null || req.query.id === undefined) &&
     (req.query.category_id === null || req.query.category_id === undefined) &&
-    (req.query.count === null || req.query.count === undefined)
+    (req.query.count === null || req.query.count === undefined) &&
+    (req.query.last_item_id === undefined || req.query.last_item_id === null)
   ) {
-    console.log("Fired in select all");
-
     connection.query("SELECT * FROM `products`", [], (error, results) => {
       // Handle Errors
       if (error) {
@@ -282,13 +359,21 @@ const handleDeleteCategory = (req, res) => {
  * @param {req} req
  * @param {res} res
  */
-const handleGetProductCategories = (req, res) => {
+const handleGetProductCategories = (
+  req,
+  res,
+  next,
+  lastItemId = 0,
+  count = 20,
+  ORDER_BY = "DESC"
+) => {
   // Fetch categories by count (limit)
 
   if (
     (req.query.count !== undefined || req.query.count !== null) &&
     (req.query.select_all === null || req.query.select_all === undefined) &&
-    (req.query.id === null || req.query.id === undefined)
+    (req.query.id === null || req.query.id === undefined) &&
+    (req.query.last_item_id === undefined || req.query.last_item_id === null)
   ) {
     connection.query(
       "SELECT * FROM `categories` LIMIT " + req.query.count,
@@ -313,12 +398,81 @@ const handleGetProductCategories = (req, res) => {
     );
   }
 
+  // Get categories from db using the last item/row id from category list in both ascending and descending order
+
+  if (
+    (req.query.last_item_id !== undefined || req.query.last_item_id !== null) &&
+    (req.query.count !== undefined || req.query.count !== null) &&
+    (req.query.id === null || req.query.id === undefined) &&
+    (req.query.select_all === null || req.query.select_all === undefined)
+  ) {
+    // Check if values were passed from the client for the last item id and count, if any use that instead of default value. This will help in continous pagination of data.
+    if (req.query.last_item_id !== null || req.query.last_item_id !== "") {
+      lastItemId = req.query.last_item_id;
+    }
+
+    if (req.query.count !== null || req.query.count !== "") {
+      count = req.query.count;
+    }
+
+    /**
+     * using the order_by param client can change the order the data is arranged in the array either by ascending or descending. Default order is descending
+     * @todo add order_by param to client to process changes dynamically
+     */
+    let sql;
+    if (ORDER_BY === "DESC" && lastItemId > 0) {
+      /**  for desc ordered list, the next page to get must be lesser that the last-item-id */
+      sql =
+        "SELECT * FROM `categories` WHERE `id` < " +
+        `${lastItemId}` +
+        " ORDER BY `id` " +
+        `${ORDER_BY}` +
+        " LIMIT " +
+        `${count}`;
+    } else {
+      /**  assume we are using  asc ordered list, the next page to get must be greater that the last-item-id */
+      sql =
+        "SELECT * FROM `categories` WHERE `id` > " +
+        " ORDER BY `id` " +
+        `${ORDER_BY}` +
+        " LIMIT " +
+        `${count}`;
+    }
+    connection.query(sql, (error, results) => {
+      // Handle Errors
+      if (error) {
+        statusManager(res, 400, `Error occured: ${error}`);
+      }
+
+      // Return Results to client
+      if ((results !== undefined || results !== null) && !error) {
+        //Return the last item id from the results array for continous pagination of data. If results array is empty then last item id is returned as null to inform the client of the current situation
+        const parsedResults = JSON.parse(JSON.stringify(results));
+        const parsedLastItemId =
+          parsedResults[0] === undefined
+            ? null
+            : parsedResults[parsedResults.length - 1].id;
+
+        statusManager(
+          res,
+          200,
+          parsedResults[0] === undefined
+            ? "No categories retrived, end of pagination"
+            : "Category list retrieved with last item id",
+          results,
+          { last_item_id: parsedLastItemId }
+        );
+      }
+    });
+  }
+
   // Get category with id
 
   if (
     (req.query.id !== null || req.query.id !== undefined) &&
     (req.query.select_all === null || req.query.select_all === undefined) &&
-    (req.query.count === undefined || req.query.count === null)
+    (req.query.count === undefined || req.query.count === null) &&
+    (req.query.last_item_id === undefined || req.query.last_item_id === null)
   ) {
     connection.query(
       "SELECT * FROM `categories` WHERE `id` = ?",
@@ -346,7 +500,8 @@ const handleGetProductCategories = (req, res) => {
   if (
     req.query.select_all == 1 &&
     (req.query.id === null || req.query.id === undefined) &&
-    (req.query.count === undefined || req.query.count === null)
+    (req.query.count === undefined || req.query.count === null) &&
+    (req.query.last_item_id === undefined || req.query.last_item_id === null)
   ) {
     connection.query("SELECT * FROM `categories` ", [], (error, results) => {
       // Handle Errors
