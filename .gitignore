@@ -3,3 +3,4 @@
 /.env.production
 /.env.staging
 /App_settings.txt
+/.env.dev
