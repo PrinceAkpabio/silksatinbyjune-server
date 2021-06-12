@@ -139,12 +139,13 @@ const handleGetProductList = (
 
   if (
     (req.query.last_item_id !== undefined || req.query.last_item_id !== null) &&
-    (req.query.count !== undefined || req.query.count !== null) &&
+    // (req.query.count !== undefined || req.query.count !== null) &&
     (req.query.id === null || req.query.id === undefined) &&
     (req.query.category_id === null || req.query.category_id === undefined) &&
     (req.query.select_all === null || req.query.select_all === undefined)
   ) {
     // Check if values were passed from the client for the last item id and count, if any use that instead of default value. This will help in continous pagination of data.
+
     if (req.query.last_item_id !== null || req.query.last_item_id !== "") {
       lastItemId = req.query.last_item_id;
     }

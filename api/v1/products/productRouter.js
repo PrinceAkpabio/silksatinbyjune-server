@@ -276,13 +276,19 @@ router.post("/delete-category", (req, res, next) => {
  *               description: This is returns all categories assigned to the database.
  *               schema:
  *                 type: integer
+ *             - name: sort_order
+ *               in: query
+ *               description: Change the order in which data is returned either ascending or descending
+ *               schema:
+ *                 type: string
  *             responses:
  *                   200:
- *                     description: Successfully fetched all categories from database
+ *                     description: Successfully fetched all categories from database for two
  *
  */
 router.get("/category-list", (req, res, next) => {
   handleGetProductCategories(req, res, next);
 });
 
+// jhhjhjljdfkhdsfd
 module.exports = router;

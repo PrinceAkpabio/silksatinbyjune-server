@@ -7,12 +7,14 @@ const { openapiSpecification } = require("./swagger-ui-options");
  * @param  {path} path
  * @param  {data} data
  */
-const handleWriteAndUpdateApiDocsFile = (path, data) => {
+const handleWriteAndUpdateApiDocsFile = (path, data, fileWatched) => {
   try {
     const convertJsonFileToYaml = YAML.stringify(data);
 
     fs.writeFile(path, convertJsonFileToYaml, (err) => {
-      console.log("API write error: ", err);
+      err === null
+        ? console.log(`File-- ${fileWatched} changed!`)
+        : console.log("API write error: ", err);
     });
   } catch (err) {
     console.log("API catch error: ", err);
@@ -21,9 +23,12 @@ const handleWriteAndUpdateApiDocsFile = (path, data) => {
 
 /**
  * call function to write new api docs in yaml format.
- * Script to run file: npm run generate-docs
+ * Script to run file: npm run generate-docs is being automatically ran with a watcher file when a router file changes
  */
+const filename = process.argv[2];
+
 handleWriteAndUpdateApiDocsFile(
   "./api/v1/docs/api-docs.yaml",
-  openapiSpecification
+  openapiSpecification,
+  filename
 );
