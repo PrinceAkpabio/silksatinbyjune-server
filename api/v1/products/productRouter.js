@@ -75,7 +75,7 @@ router.post("/add", urlParser, (req, res, next) => {
  *               description: This is the product id of the category we are fetching from
  *                 a database. This is for multi-category use case.
  *               schema:
- *                 type: integer
+ *                 type: string
  *             - name: category_id
  *               in: query
  *               description: This is the product name of the category we are fetching from
@@ -283,12 +283,11 @@ router.post("/delete-category", (req, res, next) => {
  *                 type: string
  *             responses:
  *                   200:
- *                     description: Successfully fetched all categories from database for two
+ *                     description: Successfully fetched all categories from the database
  *
  */
 router.get("/category-list", (req, res, next) => {
   handleGetProductCategories(req, res, next);
 });
 
-// jhhjhjljdfkhdsfd
 module.exports = router;

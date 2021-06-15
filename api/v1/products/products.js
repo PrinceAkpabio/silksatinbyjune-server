@@ -1,9 +1,15 @@
 const connection = require("../../../config/db.config");
-const { statusManager } = require("../../../util/statusManager");
+const { generalUtil } = require("../../../util/generalUtils");
+
+// Get general utils for easy resuability
 const {
   convertToDoubleDateTimeValue,
   createTimeDateIn,
-} = require("../../../util/dateTimeManager");
+  statusManager,
+  isValueEmptyString,
+  isString,
+  isInjected,
+} = generalUtil();
 
 /**
  * Add product to products table using insert method for mysql and the following fields name, category_id, image, price, size, color, size_unit, description and status
@@ -11,25 +17,98 @@ const {
  * @param {res} res
  */
 const handleAddProduct = (req, res) => {
+  // console.log("reqObj: ", req);
+
+  // Check field  values from client if empty and return error response
+  const name = isValueEmptyString(
+    res,
+    req.body.name,
+    "Product Name can not be empty"
+  );
+  const category_id = isValueEmptyString(
+    res,
+    req.body.category_id,
+    "Category can not be empty"
+  );
+  const image = isValueEmptyString(
+    res,
+    req.body.image,
+    "Image can not be empty"
+  );
+  const price = isValueEmptyString(
+    res,
+    req.body.price,
+    "Price can not be empty"
+  );
+  const size = isValueEmptyString(
+    res,
+    req.body.size,
+    "Produce size can not be empty"
+  );
+  const color = isValueEmptyString(
+    res,
+    req.body.color,
+    "Product color can not be empty"
+  );
+  const size_unit = isValueEmptyString(
+    res,
+    req.body.size_unit,
+    "Product unit can not be empty"
+  );
+  const description = isValueEmptyString(
+    res,
+    req.body.description,
+    "Product description can not be empty"
+  );
+
+  // Validate if category id and price are integers
+
+  if (isString(category_id.value) || isString(price.value)) {
+    statusManager(res, 400, "Category_id or price must be an integer");
+  }
+
+  // Set the product status
+  //@todo: product status will be reimplement in a future date to make it the API more dynamic
+  const status = req.body.status || 1;
+
+  // Get timezone date and time on input to db
   const { time_in, date_in, date_updated } = createTimeDateIn(
     convertToDoubleDateTimeValue
   );
 
-  connection.query(
-    "INSERT INTO `products`(`name`,`category_id`,`image`,`price`,`size`,`color`,`size_unit`,`description`,`status`, `time_in`, `date_in`, `date_updated`) VALUES(" +
-      `'${req.body.name}', ${req.body["category_id"]}, '${req.body.image}', ${req.body.price}, ${req.body.size}, '${req.body.color}', '${req.body["size_unit"]}', '${req.body.description}', ${req.body.status}, '${time_in}', '${date_in}', '${date_updated}' ` +
-      ")",
-    (error, results) => {
-      // Handle Errors
-      if (error) {
-        statusManager(res, 400, `Error occured: ${error}`);
+  // Add product to db
+  if (
+    name.status === true &&
+    category_id.status === true &&
+    image.status === true &&
+    price.status === true &&
+    size.status === true &&
+    color.status === true &&
+    size_unit.status === true &&
+    description.status === true &&
+    isString(category_id.value) === false &&
+    isString(price.value) === false
+  ) {
+    connection.query(
+      "INSERT INTO `products`(`name`,`category_id`,`image`,`price`,`size`,`color`,`size_unit`,`description`,`status`, `time_in`, `date_in`, `date_updated`) VALUES(" +
+        `'${name.value}', ${category_id.value}, '${image.value}', ${price.value}, ${size.value}, '${color.value}', '${size_unit.value}', '${description.value}', ${status}, '${time_in}', '${date_in}', '${date_updated}' ` +
+        ")",
+      (error, results) => {
+        // Handle Errors
+        if (error) {
+          statusManager(
+            res,
+            400,
+            `Product could not be added due to: ${error}`
+          );
+        }
+        // Return Results to client
+        if ((results !== undefined || results !== null) && !error) {
+          statusManager(res, 200, "New product added");
+        }
       }
-      // Return Results to client
-      if ((results !== undefined || results !== null) && !error) {
-        statusManager(res, 200, "New product added");
-      }
-    }
-  );
+    );
+  }
 };
 
 /**
@@ -81,6 +160,11 @@ const handleGetProductList = (
   }
 
   // Get product with id
+  const id = req.query.id;
+  const sqlSt = "SELECT * FROM `products` WHERE `id` = " + `${id}`;
+  console.log("sql injected: ", sqlSt);
+  const check = isInjected(sqlSt);
+  console.log("sql check: ", check);
 
   if (
     (req.query.id !== null || req.query.id !== undefined) &&
@@ -89,20 +173,16 @@ const handleGetProductList = (
     (req.query.count === null || req.query.count === undefined) &&
     (req.query.last_item_id === undefined || req.query.last_item_id === null)
   ) {
-    connection.query(
-      "SELECT * FROM `products` WHERE `id` = ?",
-      req.query.id,
-      (error, results) => {
-        // Handle Errors
-        if (error) {
-          statusManager(res, 400, `Error occured: ${error}`);
-        }
-        // Return Results to client
-        if ((results !== undefined || results !== null) && !error) {
-          statusManager(res, 200, "Product retrieved", results);
-        }
+    connection.query(sqlSt, (error, results) => {
+      // Handle Errors
+      if (error) {
+        statusManager(res, 400, `Error occured: ${error}`);
       }
-    );
+      // Return Results to client
+      if ((results !== undefined || results !== null) && !error) {
+        statusManager(res, 200, "Product retrieved", results);
+      }
+    });
   }
 
   // Fetch products by category id
@@ -258,21 +338,32 @@ const handleGetSingleProduct = (req, res) => {
  * @param {res} res
  */
 const handleDeleteProduct = (req, res) => {
-  connection.query(
-    "DELETE FROM `products` WHERE `id` = ?",
-    req.body.id,
-    (error, results) => {
-      // Handle Errors
-      if (error) {
-        statusManager(res, 400, `Error occured: ${error}`);
-      }
+  //Ensure product id is aviable for request
+  const id = req.body.id;
 
-      // Return Results to client
-      if (results !== undefined && !error) {
-        statusManager(res, 200, "Product deleted from category");
+  //Validate if id is integer
+  if (isString(id)) {
+    statusManager(res, 400, "Id can must be integer");
+  }
+
+  // Make query if id is aviable and not a string
+  if (isString(id) === false) {
+    connection.query(
+      "DELETE FROM `products` WHERE `id` = ?",
+      id,
+      (error, results) => {
+        // Handle Errors
+        if (error) {
+          statusManager(res, 400, `Error occured: ${error}`);
+        }
+
+        // Return Results to client
+        if (results !== undefined && !error) {
+          statusManager(res, 200, "Product deleted from category");
+        }
       }
-    }
-  );
+    );
+  }
 };
 
 /**
@@ -281,24 +372,96 @@ const handleDeleteProduct = (req, res) => {
  * @param {res} res
  */
 const handleUpdateProduct = (req, res) => {
-  const { date_updated } = createTimeDateIn(convertToDoubleDateTimeValue);
-  connection.query(
-    "UPDATE `products` SET " +
-      `name ='${req.body.name}', category_id =${req.body.category_id}, image ='${req.body.image}', price =${req.body.price}, size =${req.body.size}, color ='${req.body.color}', size_unit ='${req.body["size_unit"]}', description ='${req.body.description}', date_updated='${date_updated}' ` +
-      "WHERE `id` =" +
-      `${req.body.id}`,
-    (error, results) => {
-      // Handle Errors
-      if (error) {
-        statusManager(res, 400, `Error occured: ${error}`);
-      }
+  // Validate incoming query values from client and check if they are empty string and also if required integers types are valid
 
-      // Return Results to client
-      if (results !== undefined && !error) {
-        statusManager(res, 200, "Product updated successfully", results);
-      }
-    }
+  const id = isValueEmptyString(res, req.body.id, "Id can not be empty");
+  const name = isValueEmptyString(
+    res,
+    req.body.name,
+    "Product name can not be empty"
   );
+  const category_id = isValueEmptyString(
+    res,
+    req.body.category_id,
+    "Category id can not be empty"
+  );
+  const image = isValueEmptyString(
+    res,
+    req.body.image,
+    "Product Image can not be empty"
+  );
+  const price = isValueEmptyString(
+    res,
+    req.body.price,
+    "Product Price can not be empty"
+  );
+  const size = isValueEmptyString(
+    res,
+    req.body.size,
+    "Product size can not be empty"
+  );
+  const color = isValueEmptyString(
+    res,
+    req.body.color,
+    "Product Colour can not be empty"
+  );
+  const size_unit = isValueEmptyString(
+    res,
+    req.body.size_unit,
+    "Product unit can not be empty"
+  );
+  const description = isValueEmptyString(
+    res,
+    req.body.description,
+    "Product description can not be empty"
+  );
+
+  // Validate if required integers - category_id, price and id - are valid
+
+  if (
+    isString(id.value) ||
+    isString(category_id.value) ||
+    isString(price.value)
+  ) {
+    statusManager(
+      res,
+      400,
+      "Either Id, category_id or price must be an integer"
+    );
+  }
+
+  const { date_updated } = createTimeDateIn(convertToDoubleDateTimeValue);
+
+  if (
+    name.status === true &&
+    category_id.status === true &&
+    image.status === true &&
+    price.status === true &&
+    size.status === true &&
+    color.status === true &&
+    size_unit.status === true &&
+    description.status === true &&
+    isString(category_id.value) === false &&
+    isString(price) === false &&
+    isString(id.value) === false
+  )
+    connection.query(
+      "UPDATE `products` SET " +
+        `name ='${name.value}', category_id =${category_id.value}, image ='${image.value}', price =${price.value}, size =${size.value}, color ='${color.value}', size_unit ='${size_unit.value}', description ='${description.value}', date_updated='${date_updated}' ` +
+        "WHERE `id` =" +
+        `${id.value}`,
+      (error, results) => {
+        // Handle Errors
+        if (error) {
+          statusManager(res, 400, `Error occured: ${error}`);
+        }
+
+        // Return Results to client
+        if (results !== undefined && !error) {
+          statusManager(res, 200, "Product updated successfully", results);
+        }
+      }
+    );
 };
 
 /**-------------------------------------------------
@@ -312,24 +475,35 @@ const handleUpdateProduct = (req, res) => {
  * @param {res} res
  */
 const handleAddProductCategory = (req, res) => {
+  // Validated incoming query values from client
+
+  const name = isValueEmptyString(
+    res,
+    req.body.name,
+    "Category name can not be empty"
+  );
+
   const { time_in, date_in, date_updated } = createTimeDateIn(
     convertToDoubleDateTimeValue
   );
-  connection.query(
-    "INSERT INTO `categories`(`name`, `time_in`, `date_in`, `date_updated`) VALUES(" +
-      `'${req.body.name}', '${time_in}', '${date_in}', '${date_updated}'` +
-      ")",
-    (error, results) => {
-      // Handle errors
-      if (error) {
-        statusManager(res, 400, `Error occured: ${error}`);
+
+  if (name.status === true) {
+    connection.query(
+      "INSERT INTO `categories`(`name`, `time_in`, `date_in`, `date_updated`) VALUES(" +
+        `'${name.value}', '${time_in}', '${date_in}', '${date_updated}'` +
+        ")",
+      (error, results) => {
+        // Handle errors
+        if (error) {
+          statusManager(res, 400, `Error occured: ${error}`);
+        }
+        // Return Results to client
+        if ((results !== undefined || results !== null) && !error) {
+          statusManager(res, 200, "Category added");
+        }
       }
-      // Return Results to client
-      if ((results !== undefined || results !== null) && !error) {
-        statusManager(res, 200, "Category added");
-      }
-    }
-  );
+    );
+  }
 };
 
 /**
@@ -338,21 +512,32 @@ const handleAddProductCategory = (req, res) => {
  * @param {res} res
  */
 const handleDeleteCategory = (req, res) => {
-  connection.query(
-    "DELETE FROM `categories` WHERE `id` = ?",
-    req.body.id,
-    (error, results) => {
-      // Handle errors
-      if (error) {
-        statusManager(res, 400, `Error occured: ${error}`);
-      }
+  // Validated incoming query values from client
+  const id = isValueEmptyString(res, req.body.id, "Id can not be empty");
+  // const id =  req.body.id;
 
-      // Return Results to client
-      if (results !== undefined && !error) {
-        statusManager(res, 200, "Category deleted successfully");
+  // Validate if id is an integer
+  if (isString(id.value)) {
+    statusManager(res, 400, "Id must be an integer");
+  }
+
+  if (id.status === true && isString(id.value) === false) {
+    connection.query(
+      "DELETE FROM `categories` WHERE `id` = ?",
+      req.body.id,
+      (error, results) => {
+        // Handle errors
+        if (error) {
+          statusManager(res, 400, `Error occured: ${error}`);
+        }
+
+        // Return Results to client
+        if (results !== undefined && !error) {
+          statusManager(res, 200, "Category deleted successfully");
+        }
       }
-    }
-  );
+    );
+  }
 };
 
 /**
