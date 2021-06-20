@@ -8,7 +8,7 @@ const {
   statusManager,
   isValueEmptyString,
   isString,
-  isInjected,
+  checkIfNULL,
 } = generalUtil();
 
 /**
@@ -17,55 +17,61 @@ const {
  * @param {res} res
  */
 const handleAddProduct = (req, res) => {
-  // console.log("reqObj: ", req);
-
   // Check field  values from client if empty and return error response
   const name = isValueEmptyString(
     res,
     req.body.name,
-    "Product Name can not be empty"
+    "Product Name can not be empty",
+    connection
   );
   const category_id = isValueEmptyString(
     res,
     req.body.category_id,
-    "Category can not be empty"
+    "Category can not be empty",
+    connection
   );
   const image = isValueEmptyString(
     res,
     req.body.image,
-    "Image can not be empty"
+    "Image can not be empty",
+    connection
   );
   const price = isValueEmptyString(
     res,
     req.body.price,
-    "Price can not be empty"
+    "Price can not be empty",
+    connection
   );
   const size = isValueEmptyString(
     res,
     req.body.size,
-    "Produce size can not be empty"
+    "Produce size can not be empty",
+    connection
   );
   const color = isValueEmptyString(
     res,
     req.body.color,
-    "Product color can not be empty"
+    "Product color can not be empty",
+    connection
   );
   const size_unit = isValueEmptyString(
     res,
     req.body.size_unit,
-    "Product unit can not be empty"
+    "Product unit can not be empty",
+    connection
   );
   const description = isValueEmptyString(
     res,
     req.body.description,
-    "Product description can not be empty"
+    "Product description can not be empty",
+    connection
   );
 
   // Validate if category id and price are integers
-
-  if (isString(category_id.value) || isString(price.value)) {
-    statusManager(res, 400, "Category_id or price must be an integer");
-  }
+  if (price.status === true || category_id.status === true)
+    if (isString(price.value) || isString(category_id.value)) {
+      statusManager(res, 400, "Category_id or price must be an integer");
+    }
 
   // Set the product status
   //@todo: product status will be reimplement in a future date to make it the API more dynamic
@@ -91,7 +97,7 @@ const handleAddProduct = (req, res) => {
   ) {
     connection.query(
       "INSERT INTO `products`(`name`,`category_id`,`image`,`price`,`size`,`color`,`size_unit`,`description`,`status`, `time_in`, `date_in`, `date_updated`) VALUES(" +
-        `'${name.value}', ${category_id.value}, '${image.value}', ${price.value}, ${size.value}, '${color.value}', '${size_unit.value}', '${description.value}', ${status}, '${time_in}', '${date_in}', '${date_updated}' ` +
+        `${name.value}, ${category_id.value}, ${image.value}, ${price.value}, ${size.value}, ${color.value}, ${size_unit.value}, ${description.value}, ${status}, '${time_in}', '${date_in}', '${date_updated}' ` +
         ")",
       (error, results) => {
         // Handle Errors
@@ -127,184 +133,99 @@ const handleGetProductList = (
   count = 20,
   ORDER_BY = "DESC"
 ) => {
-  // Fetch products by count (limit)
+  // Escape user input/query values
+  const id = checkIfNULL(req.query.id, connection);
+  const category_id = checkIfNULL(req.query.category_id, connection);
+  const select_all = checkIfNULL(req.query.select_all, connection);
+  const last_item_id = checkIfNULL(req.query.last_item_id, connection);
+  const count_query = checkIfNULL(req.query.count, connection);
+  const sort_by = checkIfNULL(req.query.sort_by, connection);
 
-  if (
-    (req.query.count !== undefined || req.query.count !== null) &&
-    (req.query.select_all === null || req.query.select_all === undefined) &&
-    (req.query.id === null || req.query.id === undefined) &&
-    (req.query.category_id === null || req.query.category_id === undefined) &&
-    (req.query.last_item_id === undefined || req.query.last_item_id === null)
-  ) {
-    connection.query(
-      "SELECT * FROM `products` LIMIT " + req.query.count,
-      (error, results) => {
-        // Handle Errors
-        if (error) {
-          statusManager(res, 400, error);
-        }
+  // Check if values were passed from the client for the last item id, count and sort by parameters, if any use that instead of default value. This will help in continous pagination of data.
 
-        // Return limited results to client
-        if ((results !== undefined || results !== null) && !error) {
-          statusManager(
-            res,
-            200,
-            `${req.query.count} ${
-              req.query.count == 1 ? "product" : "products"
-            } retrived from db`,
-            results
-          );
-        }
-      }
-    );
+  if (last_item_id !== null) {
+    lastItemId = last_item_id;
   }
 
-  // Get product with id
-  const id = req.query.id;
-  const sqlSt = "SELECT * FROM `products` WHERE `id` = " + `${id}`;
-  console.log("sql injected: ", sqlSt);
-  const check = isInjected(sqlSt);
-  console.log("sql check: ", check);
-
-  if (
-    (req.query.id !== null || req.query.id !== undefined) &&
-    (req.query.category_id === null || req.query.category_id === undefined) &&
-    (req.query.select_all === null || req.query.select_all === undefined) &&
-    (req.query.count === null || req.query.count === undefined) &&
-    (req.query.last_item_id === undefined || req.query.last_item_id === null)
-  ) {
-    connection.query(sqlSt, (error, results) => {
-      // Handle Errors
-      if (error) {
-        statusManager(res, 400, `Error occured: ${error}`);
-      }
-      // Return Results to client
-      if ((results !== undefined || results !== null) && !error) {
-        statusManager(res, 200, "Product retrieved", results);
-      }
-    });
+  if (count_query !== null) {
+    count = count_query;
   }
 
-  // Fetch products by category id
-  if (
-    (req.query.category_id !== undefined || req.query.category_id !== null) &&
-    (req.query.id === null || req.query.id === undefined) &&
-    (req.query.select_all === null || req.query.select_all === undefined) &&
-    (req.query.count === null || req.query.count === undefined) &&
-    (req.query.last_item_id === undefined || req.query.last_item_id === null)
-  ) {
-    connection.query(
-      "SELECT * FROM `products` WHERE `category_id` = ?",
-      [req.query.category_id],
-      (error, results) => {
-        // Handle Errors
-        if (error) {
-          statusManager(res, 400, `Error occured: ${error}`);
-        }
-
-        // Return Results to client
-        if ((results !== undefined || results !== null) && !error) {
-          statusManager(
-            res,
-            200,
-            "All products retrieved by category",
-            results
-          );
-        }
-      }
-    );
+  if (sort_by !== null) {
+    ORDER_BY = sort_by == 1 ? "ASC" : "DESC";
   }
 
-  // Get products from db using the last item/row id from product list in both ascending and descending order
+  /**
+   * Choose sql statement to be used to query the products table
+   */
+  let sql;
 
-  if (
-    (req.query.last_item_id !== undefined || req.query.last_item_id !== null) &&
-    // (req.query.count !== undefined || req.query.count !== null) &&
-    (req.query.id === null || req.query.id === undefined) &&
-    (req.query.category_id === null || req.query.category_id === undefined) &&
-    (req.query.select_all === null || req.query.select_all === undefined)
-  ) {
-    // Check if values were passed from the client for the last item id and count, if any use that instead of default value. This will help in continous pagination of data.
+  if (id !== null) {
+    // Used when you want to get a single product
+    sql = "SELECT * FROM `products` WHERE `id` = " + id;
+  } else if (category_id !== null) {
+    // Used when you want fetch products by the category they belong to.
+    sql =
+      "SELECT * FROM `products` WHERE `category_id` = " +
+      category_id +
+      " ORDER BY `id` " +
+      ORDER_BY +
+      " LIMIT " +
+      count;
+  } else if (select_all !== null && select_all == 1) {
+    // Used when you want to select every product in the products table
+    sql =
+      "SELECT * FROM `products` " +
+      " ORDER BY `id` " +
+      ORDER_BY +
+      " LIMIT " +
+      count;
+  } else if ((ORDER_BY === "DESC" && lastItemId > 0) || count !== null) {
+    /**  for descending ordered list, the next page to get must be lesser that the last-item-id */
+    sql =
+      "SELECT * FROM `products` WHERE `id` < " +
+      `${lastItemId}` +
+      " ORDER BY `id` " +
+      `${ORDER_BY}` +
+      " LIMIT " +
+      `${count}`;
+  } else if ((ORDER_BY === "ASC" && lastItemId > 0) || count !== null) {
+    /**  assume we are using  ascending ordered list, the next page to get must be greater that the last-item-id */
+    sql =
+      "SELECT * FROM `products` WHERE `id` > " +
+      `${lastItemId}` +
+      " ORDER BY `id` " +
+      `${ORDER_BY}` +
+      " LIMIT " +
+      `${count}`;
+  }
 
-    if (req.query.last_item_id !== null || req.query.last_item_id !== "") {
-      lastItemId = req.query.last_item_id;
+  // After selecting the sql statement and validating user inputs/query values you want to use to query the db, the query can now be made.
+  connection.query(sql, (error, results) => {
+    // Handle Errors
+    if (error) {
+      statusManager(res, 400, error);
     }
 
-    if (req.query.count !== null || req.query.count !== "") {
-      count = req.query.count;
+    // Return results to client
+    if ((results !== undefined || results !== null) && !error) {
+      // Get parsed data as the results object returned is in packetRow data form not suitable for client consumption
+      const parsedResults = JSON.parse(JSON.stringify(results));
+
+      // Retrive last item id for use in client pagination
+      const parsedLastItemId =
+        parsedResults[0] === undefined
+          ? null
+          : parsedResults[parsedResults.length - 1].id;
+
+      // Finally we can now sent data to the client. N/B: when id is used to query db we dont return the last item id to the client
+      id !== null
+        ? statusManager(res, 200, "Product found!", parsedResults)
+        : statusManager(res, 200, "Products list found", parsedResults, {
+            last_item_id: parsedLastItemId,
+          });
     }
-
-    /**
-     * using the order_by param client can change the order the data is arranged in the array either by ascending or descending. Default order is descending
-     * @todo add order_by param to client to process changes dynamically
-     */
-    let sql;
-    if (ORDER_BY === "DESC" && lastItemId > 0) {
-      /**  for desc ordered list, the next page to get must be lesser that the last-item-id */
-      sql =
-        "SELECT * FROM `products` WHERE `id` < " +
-        `${lastItemId}` +
-        " ORDER BY `id` " +
-        `${ORDER_BY}` +
-        " LIMIT " +
-        `${count}`;
-    } else {
-      /**  assume we are using  asc ordered list, the next page to get must be greater that the last-item-id */
-      sql =
-        "SELECT * FROM `products` WHERE `id` > " +
-        " ORDER BY `id` " +
-        `${ORDER_BY}` +
-        " LIMIT " +
-        `${count}`;
-    }
-    connection.query(sql, (error, results) => {
-      // Handle Errors
-      if (error) {
-        statusManager(res, 400, `Error occured: ${error}`);
-      }
-
-      // Return Results to client
-      if ((results !== undefined || results !== null) && !error) {
-        //Return the last item id from the results array for continous pagination of data. If results array is empty then last item id is returned as null to inform the client of the current situation
-        const parsedResults = JSON.parse(JSON.stringify(results));
-        const parsedLastItemId =
-          parsedResults[0] === undefined
-            ? null
-            : parsedResults[parsedResults.length - 1].id;
-
-        statusManager(
-          res,
-          200,
-          parsedResults[0] === undefined
-            ? "No products retrived, end of pagination"
-            : "Product list retrieved with last item id",
-          results,
-          { last_item_id: parsedLastItemId }
-        );
-      }
-    });
-  }
-
-  // Fetch all products in db
-  if (
-    req.query.select_all == 1 &&
-    (req.query.id === null || req.query.id === undefined) &&
-    (req.query.category_id === null || req.query.category_id === undefined) &&
-    (req.query.count === null || req.query.count === undefined) &&
-    (req.query.last_item_id === undefined || req.query.last_item_id === null)
-  ) {
-    connection.query("SELECT * FROM `products`", [], (error, results) => {
-      // Handle Errors
-      if (error) {
-        statusManager(res, 400, `Error occured: ${error}`);
-      }
-
-      // Return Results to client
-      if ((results !== undefined || results !== null) && !error) {
-        statusManager(res, 200, "All products retrieved", results);
-      }
-    });
-  }
+  });
 };
 
 /**
@@ -312,23 +233,25 @@ const handleGetProductList = (
  * @param {req} req
  * @param {res} res
  */
-const handleGetSingleProduct = (req, res) => {
-  if (req.query.id !== null || req.query.id !== undefined) {
-    connection.query(
-      "SELECT * FROM `products` WHERE `id` = ?",
-      req.query.id,
-      (error, results) => {
-        // Handle Errors
-        if (error) {
-          statusManager(res, 400, `Error occured: ${error}`);
-        }
+const handleGetSingleProduct = (req, res, next) => {
+  // Escaped user input/query values
+  const id = checkIfNULL(req.query.id, connection);
+  const sql = "SELECT * FROM `products` WHERE `id` = " + id;
 
-        // Return Results to client
-        if ((results !== undefined || results !== null) && !error) {
-          statusManager(res, 200, "Single product retrieved", results);
-        }
+  if (id !== null || id !== undefined) {
+    connection.query(sql, (error, results) => {
+      const returnedData = JSON.parse(JSON.stringify(results));
+
+      // Handle Errors
+      if (error) {
+        statusManager(res, 400, `Error occured: ${error}`);
       }
-    );
+
+      // Return Results to client
+      if ((results !== undefined || results !== null) && !error) {
+        statusManager(res, 200, "Single product retrieved", returnedData);
+      }
+    });
   }
 };
 
@@ -339,7 +262,9 @@ const handleGetSingleProduct = (req, res) => {
  */
 const handleDeleteProduct = (req, res) => {
   //Ensure product id is aviable for request
-  const id = req.body.id;
+  // Escaped query values
+  const id = checkIfNULL(req.query.id, connection);
+  const sql = "DELETE FROM `products` WHERE `id` = " + id;
 
   //Validate if id is integer
   if (isString(id)) {
@@ -348,21 +273,17 @@ const handleDeleteProduct = (req, res) => {
 
   // Make query if id is aviable and not a string
   if (isString(id) === false) {
-    connection.query(
-      "DELETE FROM `products` WHERE `id` = ?",
-      id,
-      (error, results) => {
-        // Handle Errors
-        if (error) {
-          statusManager(res, 400, `Error occured: ${error}`);
-        }
-
-        // Return Results to client
-        if (results !== undefined && !error) {
-          statusManager(res, 200, "Product deleted from category");
-        }
+    connection.query(sql, (error, results) => {
+      // Handle Errors
+      if (error) {
+        statusManager(res, 400, `Error occured: ${error}`);
       }
-    );
+
+      // Return Results to client
+      if (results !== undefined && !error) {
+        statusManager(res, 200, "Product deleted from category");
+      }
+    });
   }
 };
 
@@ -374,46 +295,59 @@ const handleDeleteProduct = (req, res) => {
 const handleUpdateProduct = (req, res) => {
   // Validate incoming query values from client and check if they are empty string and also if required integers types are valid
 
-  const id = isValueEmptyString(res, req.body.id, "Id can not be empty");
+  const id = isValueEmptyString(
+    res,
+    req.body.id,
+    "Id can not be empty",
+    connection
+  );
   const name = isValueEmptyString(
     res,
     req.body.name,
-    "Product name can not be empty"
+    "Product name can not be empty",
+    connection
   );
   const category_id = isValueEmptyString(
     res,
     req.body.category_id,
-    "Category id can not be empty"
+    "Category id can not be empty",
+    connection
   );
   const image = isValueEmptyString(
     res,
     req.body.image,
-    "Product Image can not be empty"
+    "Product Image can not be empty",
+    connection
   );
   const price = isValueEmptyString(
     res,
     req.body.price,
-    "Product Price can not be empty"
+    "Product Price can not be empty",
+    connection
   );
   const size = isValueEmptyString(
     res,
     req.body.size,
-    "Product size can not be empty"
+    "Product size can not be empty",
+    connection
   );
   const color = isValueEmptyString(
     res,
     req.body.color,
-    "Product Colour can not be empty"
+    "Product Colour can not be empty",
+    connection
   );
   const size_unit = isValueEmptyString(
     res,
     req.body.size_unit,
-    "Product unit can not be empty"
+    "Product unit can not be empty",
+    connection
   );
   const description = isValueEmptyString(
     res,
     req.body.description,
-    "Product description can not be empty"
+    "Product description can not be empty",
+    connection
   );
 
   // Validate if required integers - category_id, price and id - are valid
@@ -423,6 +357,7 @@ const handleUpdateProduct = (req, res) => {
     isString(category_id.value) ||
     isString(price.value)
   ) {
+    console.log("Update product integer check");
     statusManager(
       res,
       400,
@@ -442,12 +377,12 @@ const handleUpdateProduct = (req, res) => {
     size_unit.status === true &&
     description.status === true &&
     isString(category_id.value) === false &&
-    isString(price) === false &&
+    isString(price.value) === false &&
     isString(id.value) === false
   )
     connection.query(
       "UPDATE `products` SET " +
-        `name ='${name.value}', category_id =${category_id.value}, image ='${image.value}', price =${price.value}, size =${size.value}, color ='${color.value}', size_unit ='${size_unit.value}', description ='${description.value}', date_updated='${date_updated}' ` +
+        `name =${name.value}, category_id =${category_id.value}, image =${image.value}, price =${price.value}, size =${size.value}, color =${color.value}, size_unit =${size_unit.value}, description =${description.value}, date_updated=${date_updated} ` +
         "WHERE `id` =" +
         `${id.value}`,
       (error, results) => {
@@ -480,7 +415,8 @@ const handleAddProductCategory = (req, res) => {
   const name = isValueEmptyString(
     res,
     req.body.name,
-    "Category name can not be empty"
+    "Category name can not be empty",
+    connection
   );
 
   const { time_in, date_in, date_updated } = createTimeDateIn(
@@ -490,7 +426,7 @@ const handleAddProductCategory = (req, res) => {
   if (name.status === true) {
     connection.query(
       "INSERT INTO `categories`(`name`, `time_in`, `date_in`, `date_updated`) VALUES(" +
-        `'${name.value}', '${time_in}', '${date_in}', '${date_updated}'` +
+        `${name.value}, '${time_in}', '${date_in}', '${date_updated}'` +
         ")",
       (error, results) => {
         // Handle errors
@@ -513,8 +449,12 @@ const handleAddProductCategory = (req, res) => {
  */
 const handleDeleteCategory = (req, res) => {
   // Validated incoming query values from client
-  const id = isValueEmptyString(res, req.body.id, "Id can not be empty");
-  // const id =  req.body.id;
+  const id = isValueEmptyString(
+    res,
+    req.body.id,
+    "Id can not be empty",
+    connection
+  );
 
   // Validate if id is an integer
   if (isString(id.value)) {
@@ -523,8 +463,7 @@ const handleDeleteCategory = (req, res) => {
 
   if (id.status === true && isString(id.value) === false) {
     connection.query(
-      "DELETE FROM `categories` WHERE `id` = ?",
-      req.body.id,
+      "DELETE FROM `categories` WHERE `id` = " + `${id.value}`,
       (error, results) => {
         // Handle errors
         if (error) {
@@ -553,158 +492,89 @@ const handleGetProductCategories = (
   count = 20,
   ORDER_BY = "DESC"
 ) => {
-  // Fetch categories by count (limit)
+  // Escape user input/query values
+  const id = checkIfNULL(req.query.id, connection);
+  const select_all = checkIfNULL(req.query.select_all, connection);
+  const last_item_id = checkIfNULL(req.query.last_item_id, connection);
+  const count_query = checkIfNULL(req.query.count, connection);
+  const sort_by = checkIfNULL(req.query.sort_by, connection);
 
-  if (
-    (req.query.count !== undefined || req.query.count !== null) &&
-    (req.query.select_all === null || req.query.select_all === undefined) &&
-    (req.query.id === null || req.query.id === undefined) &&
-    (req.query.last_item_id === undefined || req.query.last_item_id === null)
-  ) {
-    connection.query(
-      "SELECT * FROM `categories` LIMIT " + req.query.count,
-      (error, results) => {
-        // Handle Errors
-        if (error) {
-          statusManager(res, 400, error);
-        }
+  // Check if values were passed from the client for the last item id, count and sort by parameters, if any use that instead of default value. This will help in continous pagination of data.
 
-        // Return limited results to client
-        if ((results !== undefined || results !== null) && !error) {
-          statusManager(
-            res,
-            200,
-            `${req.query.count} ${
-              req.query.count == 1 ? "category" : "categories"
-            } retrived from db`,
-            results
-          );
-        }
-      }
-    );
+  if (last_item_id !== null) {
+    lastItemId = last_item_id;
   }
 
-  // Get categories from db using the last item/row id from category list in both ascending and descending order
+  if (count_query !== null) {
+    count = count_query;
+  }
 
-  if (
-    (req.query.last_item_id !== undefined || req.query.last_item_id !== null) &&
-    (req.query.count !== undefined || req.query.count !== null) &&
-    (req.query.id === null || req.query.id === undefined) &&
-    (req.query.select_all === null || req.query.select_all === undefined)
-  ) {
-    // Check if values were passed from the client for the last item id and count, if any use that instead of default value. This will help in continous pagination of data.
-    if (req.query.last_item_id !== null || req.query.last_item_id !== "") {
-      lastItemId = req.query.last_item_id;
+  if (sort_by !== null) {
+    ORDER_BY = sort_by == 1 ? "ASC" : "DESC";
+  }
+
+  /**
+   * Choose sql statement to be used to query the categories table
+   */
+  let sql;
+
+  if (id !== null) {
+    // Used when you want to get a single category
+    sql = "SELECT * FROM `categories` WHERE `id` = " + id;
+  } else if (select_all !== null && select_all == 1) {
+    // Used when you want to select every category in the categories table
+    sql =
+      "SELECT * FROM `categories` " +
+      " ORDER BY `id` " +
+      ORDER_BY +
+      " LIMIT " +
+      count;
+  } else if ((ORDER_BY === "DESC" && lastItemId > 0) || count !== null) {
+    /**  for descending ordered list, the next page to get must be lesser that the last-item-id */
+    sql =
+      "SELECT * FROM `categories` WHERE `id` < " +
+      `${lastItemId}` +
+      " ORDER BY `id` " +
+      `${ORDER_BY}` +
+      " LIMIT " +
+      `${count}`;
+  } else if ((ORDER_BY === "ASC" && lastItemId > 0) || count !== null) {
+    /**  assume we are using  ascending ordered list, the next page to get must be greater that the last-item-id */
+    sql =
+      "SELECT * FROM `categories` WHERE `id` > " +
+      `${lastItemId}` +
+      " ORDER BY `id` " +
+      `${ORDER_BY}` +
+      " LIMIT " +
+      `${count}`;
+  }
+
+  // After selecting the sql statement and validating user inputs/query values you want to use to query the db, the query can now be made.
+  connection.query(sql, (error, results) => {
+    // Handle Errors
+    if (error) {
+      statusManager(res, 400, error);
     }
 
-    if (req.query.count !== null || req.query.count !== "") {
-      count = req.query.count;
+    // Return results to client
+    if ((results !== undefined || results !== null) && !error) {
+      // Get parsed data as the results object returned is in packetRow data form not suitable for client consumption
+      const parsedResults = JSON.parse(JSON.stringify(results));
+
+      // Retrive last item id for use in client pagination
+      const parsedLastItemId =
+        parsedResults[0] === undefined
+          ? null
+          : parsedResults[parsedResults.length - 1].id;
+
+      // Finally we can now sent data to the client. N/B: when id is used to query db we dont return the last item id to the client
+      id !== null
+        ? statusManager(res, 200, "Category found!", parsedResults)
+        : statusManager(res, 200, "Category list found", parsedResults, {
+            last_item_id: parsedLastItemId,
+          });
     }
-
-    /**
-     * using the order_by param client can change the order the data is arranged in the array either by ascending or descending. Default order is descending
-     * @todo add order_by param to client to process changes dynamically
-     */
-    let sql;
-    if (ORDER_BY === "DESC" && lastItemId > 0) {
-      /**  for desc ordered list, the next page to get must be lesser that the last-item-id */
-      sql =
-        "SELECT * FROM `categories` WHERE `id` < " +
-        `${lastItemId}` +
-        " ORDER BY `id` " +
-        `${ORDER_BY}` +
-        " LIMIT " +
-        `${count}`;
-    } else {
-      /**  assume we are using  asc ordered list, the next page to get must be greater that the last-item-id */
-      sql =
-        "SELECT * FROM `categories` WHERE `id` > " +
-        " ORDER BY `id` " +
-        `${ORDER_BY}` +
-        " LIMIT " +
-        `${count}`;
-    }
-    connection.query(sql, (error, results) => {
-      // Handle Errors
-      if (error) {
-        statusManager(res, 400, `Error occured: ${error}`);
-      }
-
-      // Return Results to client
-      if ((results !== undefined || results !== null) && !error) {
-        //Return the last item id from the results array for continous pagination of data. If results array is empty then last item id is returned as null to inform the client of the current situation
-        const parsedResults = JSON.parse(JSON.stringify(results));
-        const parsedLastItemId =
-          parsedResults[0] === undefined
-            ? null
-            : parsedResults[parsedResults.length - 1].id;
-
-        statusManager(
-          res,
-          200,
-          parsedResults[0] === undefined
-            ? "No categories retrived, end of pagination"
-            : "Category list retrieved with last item id",
-          results,
-          { last_item_id: parsedLastItemId }
-        );
-      }
-    });
-  }
-
-  // Get category with id
-
-  if (
-    (req.query.id !== null || req.query.id !== undefined) &&
-    (req.query.select_all === null || req.query.select_all === undefined) &&
-    (req.query.count === undefined || req.query.count === null) &&
-    (req.query.last_item_id === undefined || req.query.last_item_id === null)
-  ) {
-    connection.query(
-      "SELECT * FROM `categories` WHERE `id` = ?",
-      req.query.id,
-      (error, results) => {
-        //Handle Errors
-        if (error) {
-          statusManager(res, 400, `Error occured: ${error}`);
-        }
-
-        // Return Results to client
-        if ((results !== undefined || results !== null) && !error) {
-          statusManager(
-            res,
-            200,
-            "Successfully fetched single category from database",
-            results
-          );
-        }
-      }
-    );
-  }
-
-  // Fetch all categories in db
-  if (
-    req.query.select_all == 1 &&
-    (req.query.id === null || req.query.id === undefined) &&
-    (req.query.count === undefined || req.query.count === null) &&
-    (req.query.last_item_id === undefined || req.query.last_item_id === null)
-  ) {
-    connection.query("SELECT * FROM `categories` ", [], (error, results) => {
-      // Handle Errors
-      if (error) {
-        statusManager(res, 400, `Error occured: ${error}`);
-      }
-      // Return Results to client
-      if ((results !== undefined || results !== null) && !error) {
-        statusManager(
-          res,
-          200,
-          "Successfully fetched all categories from database",
-          results
-        );
-      }
-    });
-  }
+  });
 };
 
 module.exports = {

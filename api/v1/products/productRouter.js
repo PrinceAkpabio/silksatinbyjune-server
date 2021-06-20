@@ -46,14 +46,6 @@ const {
  *                                   type: string
  *                                description:
  *                                   type: string
- *                                status:
- *                                   type: integer
- *                                time_in:
- *                                   type: string
- *                                date_in:
- *                                   type: string
- *                                date_updated:
- *                                   type: string
  */
 
 const urlParser = express.urlencoded();
@@ -75,13 +67,18 @@ router.post("/add", urlParser, (req, res, next) => {
  *               description: This is the product id of the category we are fetching from
  *                 a database. This is for multi-category use case.
  *               schema:
- *                 type: string
+ *                 type: integer
  *             - name: category_id
  *               in: query
  *               description: This is the product name of the category we are fetching from
  *                 a database. This is for multi-category use case.
  *               schema:
- *                 type: string
+ *                 type: integer
+ *             - name: select_all
+ *               in: query
+ *               description: This is returns all products assigned to the database.
+ *               schema:
+ *                 type: integer
  *             - name: count
  *               in: query
  *               description: This returns the number of products you set in the count field
@@ -92,11 +89,11 @@ router.post("/add", urlParser, (req, res, next) => {
  *               description: Returns an array of data with less than the last row id passed. If not passed, it defaults to zero
  *               schema:
  *                  type: integer
- *             - name: select_all
+ *             - name: sort_by
  *               in: query
- *               description: This is returns all products assigned to the database.
+ *               description: Returns an array based on either ascending or descending order
  *               schema:
- *                 type: integer
+ *                  type: integer
  *             responses:
  *                   200:
  *                     description: Successfully fetched all products from database
@@ -122,7 +119,7 @@ router.get("/list", (req, res, next) => {
  *            in: query
  *            description: This is the product-id of the product we are fetching from a category. This is for multi-products use case.
  *            schema:
- *                type: integer
+ *                type: string
  */
 
 router.get("/item/:id", (req, res, next) => {
@@ -261,6 +258,11 @@ router.post("/delete-category", (req, res, next) => {
  *                 a database. This is for multi-category use case.
  *               schema:
  *                 type: integer
+ *             - name: select_all
+ *               in: query
+ *               description: This is returns all categories assigned to the database.
+ *               schema:
+ *                 type: integer
  *             - name: count
  *               in: query
  *               description: Fetch categories by a defined limit or count
@@ -271,16 +273,11 @@ router.post("/delete-category", (req, res, next) => {
  *               description: Returns an array of data with less than the last row id passed. If not passed,it defaults to zero
  *               schema:
  *                  type: integer
- *             - name: select_all
- *               in: query
- *               description: This is returns all categories assigned to the database.
- *               schema:
- *                 type: integer
- *             - name: sort_order
+ *             - name: sort_by
  *               in: query
  *               description: Change the order in which data is returned either ascending or descending
  *               schema:
- *                 type: string
+ *                 type: integer
  *             responses:
  *                   200:
  *                     description: Successfully fetched all categories from the database
@@ -289,5 +286,5 @@ router.post("/delete-category", (req, res, next) => {
 router.get("/category-list", (req, res, next) => {
   handleGetProductCategories(req, res, next);
 });
-
+// sfdjkhj
 module.exports = router;

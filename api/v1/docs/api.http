@@ -1,22 +1,25 @@
 
-POST http://localhost:4000/product/add
-Content-Type: application/json
+# POST http://localhost:4000/product/add
+# Content-Type: application/json
 
-{
- "name": "Yellow pyjamas"
-}
+# {
+#  "name": "Yellow pyjamas"
+# }
+
+GET http://localhost:4000/product/list?count=4
+
+GET http://localhost:4000/product/item/id?id=225%20select%20*%20FROM%20products--;
 
 
 {
   "name": "Bottegas scarves",
-  "category_id": 1,
   "image": "https://www.mensjournal.com/wp-content/uploads/scarves-main-4491bdbf-a40c-424e-bfe8-dd6857beb063.jpg?w=900&quality=86&strip=all&ezimgfmt=ng:webp/ngcb5",
   "price": 1200,
   "size": 14,
+   "category_id": 35,
   "color": "lilac",
   "size_unit": "inches",
   "description": "For those who look like individuals, and when winter’s chilly winds and icy snows roll in, there’s no more stylish mark of distinction than a really good bottega scarf",
-  "status": 1
 }
 
 

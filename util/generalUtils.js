@@ -120,7 +120,14 @@ module.exports.generalUtil = () => {
    * ........................
    */
   _utilLibrary.isString = (value) => {
-    return typeof value === "string" || value instanceof String;
+    // console.log(
+    //   "IS STRING: ",
+    //   isNaN(value),
+    //   typeof value === "string",
+    //   value instanceof String,
+    //   value
+    // );
+    return isNaN(value) || value instanceof String;
   };
 
   /**
@@ -131,15 +138,45 @@ module.exports.generalUtil = () => {
    * @param {boolean} status
    * @returns value if not an empty string, else sends an error response to the client
    */
-  _utilLibrary.isValueEmptyString = (res, value, message, status = false) => {
+  _utilLibrary.isValueEmptyString = (
+    res,
+    value,
+    message,
+    connect,
+    status = false
+  ) => {
+    // Check value for new lines, tabs and certain sql queries and alert it's status
+    const check = _utilLibrary.isInjected(value);
+
     if (value == "") {
+      return res.status(400).json({
+        error: true,
+        message: message,
+      });
+    } else if (check === true) {
       return res.status(400).json({
         error: true,
         message: message,
       });
     } else {
       status = true;
-      return { value: value, status: status };
+      return {
+        value: _utilLibrary.checkIfNULL(connect.escape(value), connect),
+        status: status,
+      };
+    }
+  };
+
+  /**
+   * Check if connection.escape method returns a NULL string
+   * @param {any} value
+   * @returns null is condition is true. When false, value is returned back
+   */
+  _utilLibrary.checkIfNULL = (value, conn) => {
+    if (_utilLibrary.isString(value) === false) {
+      return value;
+    } else {
+      return value === undefined || value === null ? null : conn.escape(value);
     }
   };
 
@@ -159,14 +196,31 @@ module.exports.generalUtil = () => {
       "(%09+)",
     ];
     const inject = injections.join("|");
-    const injectRegx = /inject/i;
+    const injectRegx = /injections.join("|")/i;
 
-    console.log("regx: ", injectRegx, " injectStr: ", inject);
+    // console.log("regx: ", injectRegx, " injectStr: ", inject);
 
     if (injectRegx.test(str)) {
       return true;
     } else {
       return false;
+    }
+  };
+
+  // Escape strings from values
+  _utilLibrary.mysqlEscape = (stringToEscape) => {
+    if (stringToEscape == "") {
+      return stringToEscape;
+    }
+    if (typeof stringToEscape === "string") {
+      return stringToEscape
+        .replace(/\\/g, "\\\\")
+        .replace(/\'/g, "\\'")
+        .replace(/\"/g, '\\"')
+        .replace(/\n/g, "\\\n")
+        .replace(/\r/g, "\\\r")
+        .replace(/\x00/g, "\\\x00")
+        .replace(/\x1a/g, "\\\x1a");
     }
   };
 
