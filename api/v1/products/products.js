@@ -131,7 +131,7 @@ const handleGetProductList = (
   next,
   lastItemId = 0,
   count = 20,
-  ORDER_BY = "DESC"
+  ORDER_BY = "ASC"
 ) => {
   // Escape user input/query values
   const id = checkIfNULL(req.query.id, connection);
@@ -141,9 +141,9 @@ const handleGetProductList = (
   const count_query = checkIfNULL(req.query.count, connection);
   const sort_by = checkIfNULL(req.query.sort_by, connection);
 
-  // Check if values were passed from the client for the last item id, count and sort by parameters, if any use that instead of default value. This will help in continous pagination of data.
-
   if (last_item_id !== null) {
+    // Check if values were passed from the client for the last item id, count and sort by parameters, if any use that instead of default value. This will help in continous pagination of data.
+
     lastItemId = last_item_id;
   }
 
@@ -172,7 +172,10 @@ const handleGetProductList = (
       ORDER_BY +
       " LIMIT " +
       count;
-  } else if (select_all !== null && select_all == 1) {
+  } else if (
+    (select_all !== null && select_all == 1) ||
+    (last_item_id === null && count !== null)
+  ) {
     // Used when you want to select every product in the products table
     sql =
       "SELECT * FROM `products` " +
@@ -180,7 +183,7 @@ const handleGetProductList = (
       ORDER_BY +
       " LIMIT " +
       count;
-  } else if ((ORDER_BY === "DESC" && lastItemId > 0) || count !== null) {
+  } else if (ORDER_BY === "DESC" && lastItemId > 0 && count !== null) {
     /**  for descending ordered list, the next page to get must be lesser that the last-item-id */
     sql =
       "SELECT * FROM `products` WHERE `id` < " +
@@ -189,7 +192,7 @@ const handleGetProductList = (
       `${ORDER_BY}` +
       " LIMIT " +
       `${count}`;
-  } else if ((ORDER_BY === "ASC" && lastItemId > 0) || count !== null) {
+  } else if (ORDER_BY === "ASC" && lastItemId > 0 && count !== null) {
     /**  assume we are using  ascending ordered list, the next page to get must be greater that the last-item-id */
     sql =
       "SELECT * FROM `products` WHERE `id` > " +
@@ -213,7 +216,7 @@ const handleGetProductList = (
       const parsedResults = JSON.parse(JSON.stringify(results));
 
       // Retrive last item id for use in client pagination
-      const parsedLastItemId =
+      let parsedLastItemId =
         parsedResults[0] === undefined
           ? null
           : parsedResults[parsedResults.length - 1].id;
@@ -357,7 +360,6 @@ const handleUpdateProduct = (req, res) => {
     isString(category_id.value) ||
     isString(price.value)
   ) {
-    console.log("Update product integer check");
     statusManager(
       res,
       400,
@@ -490,7 +492,7 @@ const handleGetProductCategories = (
   next,
   lastItemId = 0,
   count = 20,
-  ORDER_BY = "DESC"
+  ORDER_BY = "ASC"
 ) => {
   // Escape user input/query values
   const id = checkIfNULL(req.query.id, connection);
@@ -521,7 +523,10 @@ const handleGetProductCategories = (
   if (id !== null) {
     // Used when you want to get a single category
     sql = "SELECT * FROM `categories` WHERE `id` = " + id;
-  } else if (select_all !== null && select_all == 1) {
+  } else if (
+    (select_all !== null && select_all == 1) ||
+    (last_item_id === null && count !== null)
+  ) {
     // Used when you want to select every category in the categories table
     sql =
       "SELECT * FROM `categories` " +
@@ -529,7 +534,7 @@ const handleGetProductCategories = (
       ORDER_BY +
       " LIMIT " +
       count;
-  } else if ((ORDER_BY === "DESC" && lastItemId > 0) || count !== null) {
+  } else if (ORDER_BY === "DESC" && lastItemId > 0 && count !== null) {
     /**  for descending ordered list, the next page to get must be lesser that the last-item-id */
     sql =
       "SELECT * FROM `categories` WHERE `id` < " +
@@ -538,7 +543,7 @@ const handleGetProductCategories = (
       `${ORDER_BY}` +
       " LIMIT " +
       `${count}`;
-  } else if ((ORDER_BY === "ASC" && lastItemId > 0) || count !== null) {
+  } else if (ORDER_BY === "ASC" && lastItemId > 0 && count !== null) {
     /**  assume we are using  ascending ordered list, the next page to get must be greater that the last-item-id */
     sql =
       "SELECT * FROM `categories` WHERE `id` > " +
