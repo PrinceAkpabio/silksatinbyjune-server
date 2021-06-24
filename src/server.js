@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 require("custom-env").env("dev");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
@@ -12,7 +13,7 @@ const { statusManager } = generalUtil();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-// const PORTS = process.env.PORT;
+const ORIGIN = process.env.ORIGIN;
 
 /**
  * Set up middleware
@@ -31,6 +32,12 @@ app.use((err, req, res, next) => {
 
   next();
 });
+
+app.use(
+  cors({
+    origin: ORIGIN,
+  })
+);
 
 /**
  * Fire Routers

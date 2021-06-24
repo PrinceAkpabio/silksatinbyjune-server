@@ -17,6 +17,7 @@
   "author": "Prince Akpabio",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "custom-env": "^2.0.1",
     "express": "^4.17.1",
     "json-to-pretty-yaml": "^1.2.2",

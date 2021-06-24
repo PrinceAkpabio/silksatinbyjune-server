@@ -6,7 +6,7 @@
 #  "name": "Yellow pyjamas"
 # }
 
-GET http://localhost:4000/product/list?count=4
+GET http://localhost:4000/product/list?select_all=1
 
 GET http://localhost:4000/product/item/id?id=225%20select%20*%20FROM%20products--;
 
